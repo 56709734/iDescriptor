@@ -75,23 +75,24 @@ find_library(CRYPTO_LIBRARY
     REQUIRED
 )
 
-find_library(FRIDA_LIBRARY 
-    NAMES frida-core
-    PATHS /usr/local/lib /usr/lib /usr/lib/x86_64-linux-gnu
-    REQUIRED
-)
+# Remove frida support for now
+# find_library(FRIDA_LIBRARY 
+#     NAMES frida-core
+#     PATHS /usr/local/lib /usr/lib /usr/lib/x86_64-linux-gnu
+#     REQUIRED
+# )
 
-find_library(SSH_LIBRARY 
-    NAMES ssh
-    PATHS /usr/lib /usr/lib/x86_64-linux-gnu
-    REQUIRED
-)
+# find_library(SSH_LIBRARY 
+#     NAMES ssh
+#     PATHS /usr/lib /usr/lib/x86_64-linux-gnu
+#     REQUIRED
+# )
 
-find_library(ZIP_LIBRARY 
-    NAMES zip
-    PATHS /usr/lib /usr/lib/x86_64-linux-gnu
-    REQUIRED
-)
+# find_library(ZIP_LIBRARY 
+#     NAMES zip
+#     PATHS /usr/lib /usr/lib/x86_64-linux-gnu
+#     REQUIRED
+# )
 
 
 pkg_check_modules(PUGIXML REQUIRED IMPORTED_TARGET pugixml)
