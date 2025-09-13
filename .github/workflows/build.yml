@@ -34,6 +34,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
+            autoconf \
+            automake \
+            checkinstall \
+            git \
             pkg-config \
             libpugixml-dev \
             libusb-1.0-0-dev \
@@ -43,10 +47,7 @@ jobs:
             libusbmuxd-dev \
             libssl-dev \
             libtool-bin \
-            autoconf \
-            automake \
-            checkinstall \
-            git \
+            libreadline-dev \
 
       # required version is '>= 2.6.0'
       - name: Install libplist
@@ -78,6 +79,14 @@ jobs:
         run: |
           git clone https://github.com/libimobiledevice/libimobiledevice.git
           cd libimobiledevice
+          ./autogen.sh
+          sudo make install
+
+      - name: Install libirecovery
+        if: runner.os == 'Linux'
+        run: |
+          git clone https://github.com/libimobiledevice/libirecovery.git
+          cd libirecovery
           ./autogen.sh
           sudo make install
 
