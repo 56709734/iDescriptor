@@ -58,6 +58,11 @@ jobs:
       - name: Download and Install Bonjour SDK (Windows)
         if: runner.os == 'Windows'
         run: |
+          # Install 7-Zip via Chocolatey
+          powershell -Command "choco install 7zip --no-progress"
+          export PATH="$PATH:/c/Program Files/7-Zip"
+
+          # Download the SDK installer
           wget "https://gsf-fl.softonic.com/b18/d44/cbdcd43ad683cf6760d45ce891c3035044/bonjoursdksetup.exe?Expires=1757906571&Signature=af8dfce8a002130f34c0e93e17b8dd96d547ff69&url=https://bonjour.en.softonic.com/&Filename=bonjoursdksetup.exe" -O bonjour-sdk.exe
 
           # Compare checksum to verify download
@@ -73,8 +78,19 @@ jobs:
             exit 1
           fi
 
-          echo "Checksum verified successfully. Installing Bonjour SDK..."
-          ./bonjour-sdk.exe /S
+          echo "Checksum verified. Extracting installer..."
+          # Extract the .exe to get the .msi files
+          7z x bonjour-sdk.exe -oBonjourInstaller
+
+          # Install the Bonjour Runtime first, silently (/qn)
+          echo "Installing Bonjour Runtime..."
+          msiexec /i "$(pwd)/BonjourInstaller/Bonjour64.msi" /qn
+
+          # Install the Bonjour SDK, silently (/qn)
+          echo "Installing Bonjour SDK..."
+          msiexec /i "$(pwd)/BonjourInstaller/BonjourSDK64.msi" /qn
+
+          # Set the environment variable for CMake to find the SDK
           echo "BONJOUR_SDK_HOME=C:/Program Files/Bonjour SDK" >> $GITHUB_ENV
 
       - name: Install Qt (Linux)
