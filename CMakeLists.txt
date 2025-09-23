@@ -142,8 +142,8 @@ file(GLOB PROJECT_SOURCES
     resources.qrc
 )
 
-add_subdirectory(src/core/airplay)
-add_subdirectory(src/lib/ipatool-go)
+add_subdirectory(lib/airplay)
+add_subdirectory(lib/ipatool-go)
 
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
