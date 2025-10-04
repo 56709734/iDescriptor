@@ -14,6 +14,7 @@
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QSplitter>
+#include <QTemporaryDir>
 #include <QTreeWidget>
 #include <QVariant>
 #include <libimobiledevice/afc.h>
@@ -73,11 +74,43 @@ void AfcExplorerWidget::onItemDoubleClicked(QListWidgetItem *item)
         m_history.push(nextPath);
         loadPath(nextPath);
     } else {
-        auto *previewDialog = new MediaPreviewDialog(m_device, nextPath, this);
-        previewDialog->setAttribute(Qt::WA_DeleteOnClose);
-        previewDialog->show();
-        // TODO: we need this ?
-        emit fileSelected(nextPath);
+        const QString lowerFileName = name.toLower();
+        const bool isPreviewable =
+            lowerFileName.endsWith(".mp4") || lowerFileName.endsWith(".m4v") ||
+            lowerFileName.endsWith(".mov") || lowerFileName.endsWith(".avi") ||
+            lowerFileName.endsWith(".mkv") || lowerFileName.endsWith(".jpg") ||
+            lowerFileName.endsWith(".jpeg") || lowerFileName.endsWith(".png") ||
+            lowerFileName.endsWith(".gif") || lowerFileName.endsWith(".bmp");
+
+        if (isPreviewable) {
+            auto *previewDialog = new MediaPreviewDialog(
+                m_device, m_currentAfcClient, nextPath, this);
+            previewDialog->setAttribute(Qt::WA_DeleteOnClose);
+            previewDialog->show();
+            // TODO: we need this ?
+            emit fileSelected(nextPath);
+        } else {
+            // TODO: maybe delete in deconstructor
+            QTemporaryDir *tempDir = new QTemporaryDir();
+            if (tempDir->isValid()) {
+                qDebug() << "Created temp dir:" << tempDir->path();
+                QString localPath = tempDir->path() + "/" + name;
+                int result = export_file_to_path(
+                    m_currentAfcClient, nextPath.toUtf8().constData(),
+                    localPath.toUtf8().constData());
+                qDebug() << "Export result:" << result << "to" << localPath;
+                if (result == 0) {
+                    QDesktopServices::openUrl(QUrl::fromLocalFile(localPath));
+                } else {
+                    QMessageBox::warning(
+                        this, "Export Failed",
+                        "Could not export the file from the device.");
+                }
+            } else {
+                QMessageBox::critical(
+                    this, "Error", "Could not create a temporary directory.");
+            }
+        }
     }
 }
 
@@ -287,7 +320,7 @@ void AfcExplorerWidget::exportSelectedFile(QListWidgetItem *item,
     }
 }
 
-// Helper function to export to a specific local path
+// TODO : abstract to services
 int AfcExplorerWidget::export_file_to_path(afc_client_t afc,
                                            const char *device_path,
                                            const char *local_path)

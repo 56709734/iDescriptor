@@ -16,6 +16,7 @@
 #include <QVBoxLayout>
 #include <QVideoWidget>
 #include <QtGlobal>
+#include <libimobiledevice/afc.h>
 
 /**
  * @brief A dialog for previewing images and videos from iOS devices
@@ -32,7 +33,7 @@ class MediaPreviewDialog : public QDialog
 
 public:
     explicit MediaPreviewDialog(iDescriptorDevice *device,
-                                const QString &filePath,
+                                afc_client_t afcClient, const QString &filePath,
                                 QWidget *parent = nullptr);
     ~MediaPreviewDialog();
 
@@ -124,6 +125,8 @@ private:
     bool m_isRepeatEnabled;
     bool m_isDraggingTimeline;
     qint64 m_videoDuration;
+
+    afc_client_t m_afcClient;
 };
 
 #endif // MEDIAPREVIEWDIALOG_H

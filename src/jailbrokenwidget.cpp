@@ -627,21 +627,36 @@ void JailbrokenWidget::disconnectSSH()
     }
 
     if (iproxyProcess) {
-        iproxyProcess->terminate(); // Ask it to terminate nicely
-        if (!iproxyProcess->waitForFinished(1000)) { // Wait 1 sec
-            iproxyProcess->kill();                   // Forcefully kill it
-            iproxyProcess->waitForFinished(1000);    // Wait for it to die
-        }
-        delete iproxyProcess; // Avoid memory leak
+        iproxyProcess->kill();
+        delete iproxyProcess;
         iproxyProcess = nullptr;
     }
 
     m_terminal->hide();
-    m_connectButton->setText("Connect SSH Terminal");
     m_infoLabel->setText("SSH disconnected");
     m_sshConnected = false;
     m_isInitialized = false;
-    m_connectButton->setEnabled(true);
+    m_connectButton->setEnabled(false);
 }
 
-JailbrokenWidget::~JailbrokenWidget() { disconnectSSH(); }
+// todo: crash at exit
+JailbrokenWidget::~JailbrokenWidget()
+{
+    if (m_sshTimer) {
+        m_sshTimer->stop();
+    }
+
+    if (m_sshChannel) {
+        ssh_channel_close(m_sshChannel);
+        ssh_channel_free(m_sshChannel);
+    }
+
+    if (m_sshSession) {
+        ssh_disconnect(m_sshSession);
+        ssh_free(m_sshSession);
+    }
+
+    if (iproxyProcess) {
+        iproxyProcess->kill();
+    }
+}

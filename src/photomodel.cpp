@@ -82,8 +82,8 @@ QPixmap PhotoModel::generateVideoThumbnail(iDescriptorDevice *device,
                      });
 
     // Get the streaming URL and start playback
-    QUrl streamUrl =
-        MediaStreamerManager::sharedInstance()->getStreamUrl(device, filePath);
+    QUrl streamUrl = MediaStreamerManager::sharedInstance()->getStreamUrl(
+        device, device->afcClient, filePath);
     if (streamUrl.isEmpty()) {
         qWarning() << "Could not get stream URL for video thumbnail:"
                    << filePath;
@@ -280,7 +280,8 @@ void PhotoModel::requestThumbnail(int index)
     QFuture<QPixmap> future;
     if (isVideo) {
         // Load video thumbnail asynchronously
-        future = QtConcurrent::run([=]() {
+        // todo: implement
+        future = QtConcurrent::run([this]() {
             // Check disk cache first
             // if (QFile::exists(cachePath)) {
             //     QPixmap cached(cachePath);
@@ -304,12 +305,12 @@ void PhotoModel::requestThumbnail(int index)
             //                  << QFileInfo(info.filePath).fileName();
             //     }
             // }
-            return QIcon::fromTheme("video-x-generic").pixmap(m_thumbnailSize);
+            return QPixmap(); // Placeholder until implemented
             // return thumbnail;
         });
     } else {
         // Load image thumbnail asynchronously (existing logic)
-        future = QtConcurrent::run([=]() {
+        future = QtConcurrent::run([info, cachePath, this]() {
             return loadThumbnailFromDevice(m_device, info.filePath,
                                            m_thumbnailSize, cachePath);
         });

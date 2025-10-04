@@ -7,6 +7,7 @@
 #include <QMutex>
 #include <QObject>
 #include <QUrl>
+#include <libimobiledevice/afc.h>
 
 /**
  * @brief Singleton manager for MediaStreamer instances
@@ -32,7 +33,8 @@ public:
      * @param filePath The file path on the device
      * @return URL to stream the file, or empty URL if failed
      */
-    QUrl getStreamUrl(iDescriptorDevice *device, const QString &filePath);
+    QUrl getStreamUrl(iDescriptorDevice *device, afc_client_t afcClient,
+                      const QString &filePath);
 
     /**
      * @brief Release a streamer for the specified file

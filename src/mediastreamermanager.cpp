@@ -12,6 +12,7 @@ MediaStreamerManager *MediaStreamerManager::sharedInstance()
 }
 
 QUrl MediaStreamerManager::getStreamUrl(iDescriptorDevice *device,
+                                        afc_client_t afcClient,
                                         const QString &filePath)
 {
 
@@ -36,7 +37,7 @@ QUrl MediaStreamerManager::getStreamUrl(iDescriptorDevice *device,
     }
 
     // Create new streamer
-    auto *streamer = new MediaStreamer(device, filePath, this);
+    auto *streamer = new MediaStreamer(device, afcClient, filePath, this);
     if (!streamer->isListening()) {
         qWarning() << "MediaStreamerManager: Failed to create streamer for"
                    << filePath;

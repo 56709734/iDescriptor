@@ -26,6 +26,7 @@
 #include <QtGlobal>
 // todo : need to pass afc as well
 MediaPreviewDialog::MediaPreviewDialog(iDescriptorDevice *device,
+                                       afc_client_t afcClient,
                                        const QString &filePath, QWidget *parent)
     : QDialog(parent), m_device(device), m_filePath(filePath),
       m_isVideo(isVideoFile(filePath)), m_mainLayout(nullptr),
@@ -37,7 +38,7 @@ MediaPreviewDialog::MediaPreviewDialog(iDescriptorDevice *device,
       m_progressTimer(nullptr), m_loadingLabel(nullptr), m_statusLabel(nullptr),
       m_zoomInBtn(nullptr), m_zoomOutBtn(nullptr), m_zoomResetBtn(nullptr),
       m_fitToWindowBtn(nullptr), m_zoomFactor(1.0), m_isRepeatEnabled(true),
-      m_isDraggingTimeline(false), m_videoDuration(0)
+      m_isDraggingTimeline(false), m_videoDuration(0), m_afcClient(afcClient)
 {
     setWindowTitle(QFileInfo(filePath).fileName() + " - iDescriptor");
 
@@ -181,10 +182,9 @@ void MediaPreviewDialog::setupVideoView()
 void MediaPreviewDialog::loadMedia()
 {
     if (m_isVideo) {
-        loadVideo();
-    } else {
-        loadImage();
+        return loadVideo();
     }
+    loadImage();
 }
 
 void MediaPreviewDialog::loadImage()
@@ -213,7 +213,7 @@ void MediaPreviewDialog::loadVideo()
 
     // Get streamer URL from the singleton manager
     QUrl streamUrl = MediaStreamerManager::sharedInstance()->getStreamUrl(
-        m_device, m_filePath);
+        m_device, m_afcClient, m_filePath);
     if (streamUrl.isEmpty()) {
         m_statusLabel->setText("Failed to start video stream");
         return;

@@ -139,8 +139,8 @@ void GalleryWidget::setupUI()
                     return;
 
                 qDebug() << "Opening preview for" << filePath;
-                auto *previewDialog =
-                    new MediaPreviewDialog(m_device, filePath, this);
+                auto *previewDialog = new MediaPreviewDialog(
+                    m_device, m_device->afcClient, filePath, this);
                 previewDialog->setAttribute(Qt::WA_DeleteOnClose);
                 previewDialog->show();
             });
