@@ -83,7 +83,7 @@ void WelcomeWidget::setupUI()
     m_mainLayout->addStretch(1);
 
     // Set minimum size
-    setMinimumSize(400, 500);
+    setMinimumSize(600, 500);
 }
 
 QLabel *WelcomeWidget::createStyledLabel(const QString &text, int fontSize,
@@ -98,11 +98,6 @@ QLabel *WelcomeWidget::createStyledLabel(const QString &text, int fontSize,
     if (isBold) {
         font.setWeight(QFont::Medium);
     }
-
-    // Use system font on macOS for better integration
-#ifdef Q_OS_MAC
-    font.setFamily(".AppleSystemUIFont");
-#endif
 
     label->setFont(font);
     label->setWordWrap(true);

@@ -365,8 +365,10 @@ void AppsWidget::createAppCard(const QString &name, const QString &bundleId,
     connect(downloadIpaLabel, &ZLabel::clicked, this,
             [this, name, bundleId]() { onDownloadIpaClicked(name, bundleId); });
 
+    buttonsLayout->addStretch();
     buttonsLayout->addWidget(installLabel);
     buttonsLayout->addWidget(downloadIpaLabel);
+    buttonsLayout->addStretch();
 
     cardLayout->addLayout(buttonsLayout);
     gridLayout->addWidget(cardWidget, row, col);

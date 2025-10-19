@@ -491,22 +491,31 @@ void ToolboxWidget::onToolboxClicked(iDescriptorTool tool)
     case iDescriptorTool::WirelessPhotoImport: {
         if (!m_wirelessPhotoImportWidget) {
             m_wirelessPhotoImportWidget = new WirelessPhotoImportWidget();
+            connect(m_wirelessPhotoImportWidget, &QObject::destroyed, this,
+                    [this]() { m_wirelessPhotoImportWidget = nullptr; });
             m_wirelessPhotoImportWidget->setAttribute(Qt::WA_DeleteOnClose);
             m_wirelessPhotoImportWidget->setWindowFlag(Qt::Window);
             // m_wirelessPhotoImportWidget->resize(800, 600);
             m_wirelessPhotoImportWidget->show();
         } else {
-            m_wirelessPhotoImportWidget->show();
-            m_wirelessPhotoImportWidget->show();
+            m_wirelessPhotoImportWidget->raise();
+            m_wirelessPhotoImportWidget->activateWindow();
         }
     } break;
 #ifndef __APPLE__
     case iDescriptorTool::iFuse: {
-        iFuseWidget *ifuseWidget = new iFuseWidget(m_currentDevice);
-        ifuseWidget->setAttribute(Qt::WA_DeleteOnClose);
-        ifuseWidget->setWindowFlag(Qt::Window);
-        ifuseWidget->resize(600, 400);
-        ifuseWidget->show();
+        if (!m_ifuseWidget) {
+            m_ifuseWidget = new iFuseWidget(m_currentDevice);
+            m_ifuseWidget->setAttribute(Qt::WA_DeleteOnClose);
+            connect(m_ifuseWidget, &QObject::destroyed, this,
+                    [this]() { m_ifuseWidget = nullptr; });
+            m_ifuseWidget->setWindowFlag(Qt::Window);
+            m_ifuseWidget->resize(600, 400);
+            m_ifuseWidget->show();
+        } else {
+            m_ifuseWidget->raise();
+            m_ifuseWidget->activateWindow();
+        }
     } break;
 #endif
     case iDescriptorTool::CableInfoWidget: {

@@ -16,6 +16,9 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 #include <QWidget>
+#ifndef __APPLE__
+#include "ifusewidget.h"
+#endif
 
 class ToolboxWidget : public QWidget
 {
@@ -50,6 +53,9 @@ private:
     DevDiskImagesWidget *m_devDiskImagesWidget = nullptr;
     NetworkDevicesWidget *m_networkDevicesWidget = nullptr;
     AirPlayWindow *m_airplayWindow = nullptr;
+#ifndef __APPLE__
+    iFuseWidget *m_ifuseWidget = nullptr;
+#endif
     WirelessPhotoImportWidget *m_wirelessPhotoImportWidget = nullptr;
 
 signals:

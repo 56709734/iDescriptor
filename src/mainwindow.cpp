@@ -111,6 +111,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    const QSize minSize(900, 600);
+    setMinimumSize(minSize);
+    resize(minSize);
     // TODO
     // setWindowIcon(QIcon(":/resources/icons/icon.png"));
 
@@ -120,7 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
                                     false);
 
     setContentsMargins(0, 0, 0, 0);
-#ifdef Q_OS_MAC
+#ifdef __APPLE__
     setupMacOSWindow(this);
     setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea, false);
 #endif
@@ -180,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusbar->setContentsMargins(0, 0, 0, 0);
     ui->statusbar->addPermanentWidget(settingsButton);
 
-#ifdef Q_OS_LINUX
+#ifdef __linux__
     QList<QString> mounted_iFusePaths = iFuseManager::getMountPoints();
 
     for (const QString &path : mounted_iFusePaths) {
@@ -249,12 +252,6 @@ MainWindow::~MainWindow()
 {
     idevice_event_unsubscribe();
     irecv_device_event_unsubscribe(context);
-    // TODO:Clean up all devices
-    // for (unsigned i = 0; i < idescriptor_devices.size(); ++i)
-    // {
-    //     cleanDevice(idescriptor_devices.at(i));
-    // }
-    // idescriptor_devices.clear();
     delete ui;
     sleep(2); // Give some time for cleanup to finish
 }

@@ -54,6 +54,7 @@ void WirelessPhotoImportWidget::setupUI()
 
     // Scroll area for file list
     m_scrollArea = new QScrollArea();
+    m_scrollArea->setStyleSheet("QScrollArea { border: none; }");
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setMinimumWidth(300);
 
