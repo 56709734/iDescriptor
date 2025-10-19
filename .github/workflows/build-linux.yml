@@ -127,15 +127,30 @@ jobs:
         run: |
           # Qt version installed by the Install Qt step
           QT_VERSION="6.7.2"
-          # find the arch folder under the runner workspace Qt install
-          ARCH="$(ls -d "$RUNNER_WORKSPACE/Qt/$QT_VERSION/"* 2>/dev/null | head -n1 | xargs -n1 basename || true)"
-          if [ -z "$ARCH" ]; then
-            echo "Could not find Qt installation under $RUNNER_WORKSPACE/Qt/$QT_VERSION"
-            ls -la "$RUNNER_WORKSPACE/Qt" || true
+
+          # Try to find the Qt installation under known prefixes.
+          # The Install Qt step used `dir: ${{ github.workspace }}`, so Qt may be under
+          # $GITHUB_WORKSPACE/Qt/<version>/<arch> or under the default $RUNNER_WORKSPACE/Qt/<version>/<arch>.
+          QTDIR=""
+          for BASE in "${GITHUB_WORKSPACE:-}" "${RUNNER_WORKSPACE:-}"; do
+            if [ -n "$BASE" ] && [ -d "$BASE/Qt/$QT_VERSION" ]; then
+              ARCH_DIR="$(ls -d "$BASE/Qt/$QT_VERSION/"* 2>/dev/null | head -n1 || true)"
+              if [ -n "$ARCH_DIR" ]; then
+                ARCH="$(basename "$ARCH_DIR")"
+                QTDIR="$BASE/Qt/$QT_VERSION/$ARCH"
+                break
+              fi
+            fi
+          done
+
+          if [ -z "$QTDIR" ]; then
+            echo "Could not find Qt installation under $GITHUB_WORKSPACE/Qt/$QT_VERSION or $RUNNER_WORKSPACE/Qt/$QT_VERSION"
+            ls -la "${GITHUB_WORKSPACE%/}/Qt" 2>/dev/null || true
+            ls -la "${RUNNER_WORKSPACE%/}/Qt" 2>/dev/null || true
             exit 1
           fi
 
-          export QTDIR="$RUNNER_WORKSPACE/Qt/$QT_VERSION/$ARCH"
+          export QTDIR
           export QT_ROOT_DIR="$QTDIR"
           export PATH="$QTDIR/bin:$PATH"
 
