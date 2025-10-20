@@ -245,11 +245,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: iDescriptor-AppImage
-          path: build/iDescriptor-*.AppImage
-
-      - name: Upload Artifact (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: iDescriptor-Windows
-          path: build/Release/iDescriptor.exe
+          path: iDescriptor-*.AppImage
