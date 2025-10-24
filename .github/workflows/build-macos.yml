@@ -30,8 +30,9 @@ jobs:
           modules: "qtmultimedia qtlocation qtpositioning qtserialport"
 
       - name: Update pkgconfig path
+        shell: bash
         run: |
-          echo "Qt Root: ${QT_ROOT_DIR}"
+          ls "${QT_ROOT_DIR}/bin/" | grep qmake
 
           echo "${QT_ROOT_DIR}/lib/pkgconfig" >> $GITHUB_ENV
           echo "${QT_ROOT_DIR}/lib/cmake" >> $GITHUB_ENV
