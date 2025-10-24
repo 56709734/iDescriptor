@@ -212,12 +212,10 @@ if(APPLE)
     target_link_libraries(iDescriptor PRIVATE
     ${CORE_SERVICES_FRAMEWORK})
     message(STATUS "Using macOS Bonjour framework for network service discovery")
-endif()
 elseif (WIN32)
     find_path(DNSSD_INCLUDE_DIR dns_sd.h HINTS ${BONJOUR_SDK}/Include ) 
     target_include_directories( iDescriptor PRIVATE ${DNSSD_INCLUDE_DIR} )
     message( STATUS "Using Bonjour SDK for network service discovery" )
-endif()
 else()
     target_link_libraries(iDescriptor PRIVATE
     PkgConfig::AVAHI_CLIENT

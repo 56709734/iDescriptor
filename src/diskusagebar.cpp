@@ -1,4 +1,4 @@
-#ifdef Q_OS_MACOS
+#ifdef __APPLE__
 #include "diskusagebar.h"
 #include "platform/macos.h"
 
