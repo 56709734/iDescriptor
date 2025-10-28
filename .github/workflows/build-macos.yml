@@ -129,7 +129,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DRUN_CLANG_TIDY=OFF
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DRUN_CLANG_TIDY=OFF -DCMAKE_OSX_ARCHITECTURES=x86_64
 
       - name: Build with CMake
         run: cmake --build build --config Release
