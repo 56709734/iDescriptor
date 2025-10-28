@@ -139,9 +139,6 @@ jobs:
         run: |
           macdeployqt build/iDescriptor.app -qmldir=qml -verbose=2
 
-          # Manually bundle QtMultimediaWidgets if missing
-          cp -RL "${QT_ROOT_DIR}/lib/QtMultimediaWidgets.framework" build/iDescriptor.app/Contents/Frameworks/
-
           # Bundle libjxl_cms
           cp /usr/local/lib/libjxl_cms.0.11.dylib build/iDescriptor.app/Contents/Frameworks/
           install_name_tool -id "@rpath/libjxl_cms.0.11.dylib" build/iDescriptor.app/Contents/Frameworks/libjxl_cms.0.11.dylib
