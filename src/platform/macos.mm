@@ -13,15 +13,31 @@ void setupMacOSWindow(QMainWindow *window)
 
     NSView *nativeView = reinterpret_cast<NSView *>(window->winId());
     NSWindow *nativeWindow = [nativeView window];
-
+    [nativeWindow setMovableByWindowBackground:YES];
     if (!nativeWindow) {
         qWarning() << "setupMacOSWindow: native window is null";
         return;
     }
 
+    // // Force dark mode
+    // nsWindow.overrideUserInterfaceStyle = NSUserInterfaceStyleDark;
+
+    // Force light mode
+    // if (@available(macOS 10.14, *)) {
+    //     [nativeWindow
+    //         setAppearance:[NSAppearance
+    //         appearanceNamed:NSAppearanceNameAqua]];
+    // } else {
+    //     // Fallback: no-op on older macOS versions
+    // }
+    // nativeWindow.overrideUserInterfaceStyle = NSUserInterfaceStyleLight;
+
+    // // Reset to follow system (default)
+    // nsWindow.overrideUserInterfaceStyle = NSUserInterfaceStyleUnspecified;
+
     qDebug() << "Setting up macOS window styles";
 
-    window->setUnifiedTitleAndToolBarOnMac(true);
+    // window->setUnifiedTitleAndToolBarOnMac(true);
 
     [nativeWindow setStyleMask:[nativeWindow styleMask] |
                                NSWindowStyleMaskFullSizeContentView |

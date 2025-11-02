@@ -13,7 +13,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 #ifdef WIN32
-    // This setup MUST be done before the QApplication object is created.
     QString appPath = QCoreApplication::applicationDirPath();
     QString gstPluginPath =
         QDir::toNativeSeparators(appPath + "/gstreamer-1.0");

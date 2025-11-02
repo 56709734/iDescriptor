@@ -1,6 +1,7 @@
 #ifndef WELCOMEWIDGET_H
 #define WELCOMEWIDGET_H
 
+#include "iDescriptor-ui.h"
 #include "responsiveqlabel.h"
 #include <QHBoxLayout>
 #include <QLabel>
@@ -15,20 +16,17 @@ class WelcomeWidget : public QWidget
 public:
     explicit WelcomeWidget(QWidget *parent = nullptr);
 
-protected:
-    bool eventFilter(QObject *watched, QEvent *event) override;
-
 private:
     void setupUI();
-    QLabel *createStyledLabel(const QString &text, int fontSize = 0,
+    ZLabel *createStyledLabel(const QString &text, int fontSize = 0,
                               bool isBold = false);
 
     QVBoxLayout *m_mainLayout;
-    QLabel *m_titleLabel;
-    QLabel *m_subtitleLabel;
+    ZLabel *m_titleLabel;
+    ZLabel *m_subtitleLabel;
     ResponsiveQLabel *m_imageLabel;
-    QLabel *m_instructionLabel;
-    QLabel *m_githubLabel;
+    ZLabel *m_instructionLabel;
+    ZLabel *m_githubLabel;
 };
 
 #endif // WELCOMEWIDGET_H

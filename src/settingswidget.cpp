@@ -1,4 +1,5 @@
 #include "settingswidget.h"
+#include "mainwindow.h"
 #include "settingsmanager.h"
 #include <QCheckBox>
 #include <QComboBox>
@@ -63,13 +64,6 @@ void SettingsWidget::setupUI()
     m_autoUpdateCheck = new QCheckBox("Automatically check for updates");
     generalLayout->addWidget(m_autoUpdateCheck);
 
-    m_autoRaiseWindow =
-        new QCheckBox("Auto-raise main window on device connection");
-    generalLayout->addWidget(m_autoRaiseWindow);
-
-    m_switchToNewDevice = new QCheckBox("Switch to newly connected device");
-    generalLayout->addWidget(m_switchToNewDevice);
-
     // Theme selection
     auto *themeLayout = new QHBoxLayout();
     themeLayout->addWidget(new QLabel("Theme:"));
@@ -91,6 +85,13 @@ void SettingsWidget::setupUI()
     // === DEVICE CONNECTION SETTINGS ===
     auto *deviceGroup = new QGroupBox("Device Connection");
     auto *deviceLayout = new QVBoxLayout(deviceGroup);
+
+    m_autoRaiseWindow =
+        new QCheckBox("Auto-raise main window on device connection");
+    deviceLayout->addWidget(m_autoRaiseWindow);
+
+    m_switchToNewDevice = new QCheckBox("Switch to newly connected device");
+    deviceLayout->addWidget(m_switchToNewDevice);
 
     // Connection timeout
     auto *timeoutLayout = new QHBoxLayout();
@@ -195,16 +196,15 @@ void SettingsWidget::onBrowseButtonClicked()
 
 void SettingsWidget::onCheckUpdatesClicked()
 {
-    // TODO: Implement update checking logic
     m_checkUpdatesButton->setText("Checking...");
     m_checkUpdatesButton->setEnabled(false);
+
+    MainWindow::sharedInstance()->m_updater->checkForUpdates();
 
     // Simulate check (replace with actual update check)
     QTimer::singleShot(2000, this, [this]() {
         m_checkUpdatesButton->setText("Check for Updates");
         m_checkUpdatesButton->setEnabled(true);
-        QMessageBox::information(this, "Updates",
-                                 "You are running the latest version.");
     });
 }
 

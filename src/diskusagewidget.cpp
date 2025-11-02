@@ -85,20 +85,34 @@ void DiskUsageWidget::setupUI()
     m_mediaBar = new DiskUsageBar();
     m_othersBar = new DiskUsageBar();
     m_freeBar = new DiskUsageBar();
+
+    m_systemBar->setStyleSheet(
+        " background-color: #a1384d; border: 1px solid"
+        "#e64a5b; padding: 0; margin: 0; border-top-left-radius: 3px; "
+        "border-bottom-left-radius: 3px; ");
+    m_appsBar->setStyleSheet("background-color: #4f869f; border: 1px solid "
+                             "#63b4da; padding: 0; margin: 0; ");
+    m_mediaBar->setStyleSheet("background-color: #2ECC71; "
+                              "border: none; padding: 0; margin: 0; ");
+    m_othersBar->setStyleSheet("background-color: #a28729; border: 1px solid "
+                               "#c4a32d; padding: 0; margin: 0; ");
+    m_freeBar->setStyleSheet(
+        "background-color: #6e6d6d; border: 1px solid "
+        "#4f4f4f; padding: 0; margin: 0; border-top-right-radius: 3px; "
+        "border-bottom-right-radius: 3px; ");
+
 #else
     m_systemBar = new QWidget();
     m_appsBar = new QWidget();
     m_mediaBar = new QWidget();
     m_othersBar = new QWidget();
     m_freeBar = new QWidget();
-#endif
     // required for tooltips to have default styling
     m_systemBar->setObjectName("systemBar");
     m_appsBar->setObjectName("appsBar");
     m_mediaBar->setObjectName("mediaBar");
     m_othersBar->setObjectName("othersBar");
     m_freeBar->setObjectName("freeBar");
-
     // Set colors
     m_systemBar->setStyleSheet(
         "QWidget#systemBar { background-color: #a1384d; border: 1px solid"
@@ -116,6 +130,7 @@ void DiskUsageWidget::setupUI()
         "QWidget#freeBar { background-color: #474747; border: 1px solid "
         "#4f4f4f; padding: 0; margin: 0; border-top-right-radius: 3px; "
         "border-bottom-right-radius: 3px; }");
+#endif
 
     m_diskBarLayout->addWidget(m_systemBar);
     m_diskBarLayout->addWidget(m_appsBar);
@@ -220,11 +235,20 @@ void DiskUsageWidget::updateUI()
     m_diskBarLayout->setStretchFactor(m_freeBar, freeWidth);
 
     // Hide segments with zero usage
-    // m_systemBar->setVisible(m_systemUsage > 0);
-    // m_appsBar->setVisible(m_appsUsage > 0);
-    // m_mediaBar->setVisible(m_mediaUsage > 0);
-    // m_othersBar->setVisible(m_othersUsage > 0);
-    // m_freeBar->setVisible(m_freeSpace > 0);
+    m_systemBar->setVisible(m_systemUsage > 0);
+    m_systemLabel->setVisible(m_systemUsage > 0);
+
+    m_appsBar->setVisible(m_appsUsage > 0);
+    m_appsLabel->setVisible(m_appsUsage > 0);
+
+    m_mediaBar->setVisible(m_mediaUsage > 0);
+    m_mediaLabel->setVisible(m_mediaUsage > 0);
+
+    m_othersBar->setVisible(m_othersUsage > 0);
+    m_othersLabel->setVisible(m_othersUsage > 0);
+
+    m_freeBar->setVisible(m_freeSpace > 0);
+    m_freeLabel->setVisible(m_freeSpace > 0);
 
     // Format sizes for display
     auto formatSize = [](uint64_t bytes) -> QString {

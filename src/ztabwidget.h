@@ -1,5 +1,5 @@
-#ifndef CUSTOMTABWIDGET_H
-#define CUSTOMTABWIDGET_H
+#ifndef ZTABWIDGET_H
+#define ZTABWIDGET_H
 
 #include <QButtonGroup>
 #include <QHBoxLayout>
@@ -11,24 +11,23 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-class CustomTab : public QPushButton
+class ZTab : public QPushButton
 {
     Q_OBJECT
 
 public:
-    explicit CustomTab(const QString &text, QWidget *parent = nullptr);
+    explicit ZTab(const QString &text, QWidget *parent = nullptr);
     void setIcon(const QIcon &icon);
 };
 
-class CustomTabWidget : public QWidget
+class ZTabWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit CustomTabWidget(QWidget *parent = nullptr);
+    explicit ZTabWidget(QWidget *parent = nullptr);
     void finalizeStyles();
     int addTab(QWidget *widget, const QString &label);
-    int addTab(QWidget *widget, const QIcon &icon, const QString &label);
     void setCurrentIndex(int index);
     int currentIndex() const;
     QWidget *widget(int index) const;
@@ -50,7 +49,7 @@ private:
     QButtonGroup *m_buttonGroup;
     QWidget *m_glider;
     QPropertyAnimation *m_gliderAnimation;
-    QList<CustomTab *> m_tabs;
+    QList<ZTab *> m_tabs;
     QList<QWidget *> m_widgets;
     int m_currentIndex;
 
@@ -59,4 +58,4 @@ private:
     void updateTabStyles();
 };
 
-#endif // CUSTOMTABWIDGET_H
+#endif // ZTABWIDGET_H

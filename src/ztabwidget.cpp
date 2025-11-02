@@ -1,4 +1,4 @@
-#include "customtabwidget.h"
+#include "ztabwidget.h"
 #include <QEasingCurve>
 #include <QGraphicsDropShadowEffect>
 #include <QMainWindow>
@@ -6,24 +6,14 @@
 #include <QStyleOption>
 #include <QTimer>
 
-// CustomTab implementation
-CustomTab::CustomTab(const QString &text, QWidget *parent)
-    : QPushButton(text, parent)
+ZTab::ZTab(const QString &text, QWidget *parent) : QPushButton(text, parent)
 {
     setCheckable(true);
-    // setFixedHeight(54);
-    // setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    setFixedHeight(50);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
-void CustomTab::setIcon(const QIcon &icon)
-{
-    QPushButton::setIcon(icon);
-    setIconSize(QSize(20, 20));
-}
-
-// CustomTabWidget implementation
-CustomTabWidget::CustomTabWidget(QWidget *parent)
-    : QWidget(parent), m_currentIndex(0)
+ZTabWidget::ZTabWidget(QWidget *parent) : QWidget(parent), m_currentIndex(0)
 {
     m_mainLayout = new QVBoxLayout(this);
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -31,16 +21,11 @@ CustomTabWidget::CustomTabWidget(QWidget *parent)
 
     // Create tab bar container
     m_tabBar = new QWidget();
-    // m_tabBar->setFixedHeight(70); // 54px height + 16px padding
+    m_tabBar->setFixedHeight(50);
+    m_tabBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_tabLayout = new QHBoxLayout(m_tabBar);
-    // m_tabLayout->setContentsMargins(12, 8, 12, 8);
     m_tabLayout->setSpacing(0);
-
-    // Style the tab bar
-    m_tabBar->setStyleSheet("QWidget {"
-                            // "  background-color: white;"
-                            // "  border-radius: 35px;"
-                            "}");
+    m_tabLayout->setContentsMargins(0, 0, 0, 0);
 
     // Add drop shadow effect
     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect();
@@ -54,6 +39,8 @@ CustomTabWidget::CustomTabWidget(QWidget *parent)
 
     // Create stacked widget for content
     m_stackedWidget = new QStackedWidget();
+    m_stackedWidget->setSizePolicy(QSizePolicy::Expanding,
+                                   QSizePolicy::Expanding);
 
     // Add widgets to layout
     m_mainLayout->addWidget(m_tabBar);
@@ -62,7 +49,7 @@ CustomTabWidget::CustomTabWidget(QWidget *parent)
     setupGlider();
 }
 
-void CustomTabWidget::setupGlider()
+void ZTabWidget::setupGlider()
 {
     m_glider = new QWidget(m_tabBar);
     m_glider->setStyleSheet("QWidget {"
@@ -76,19 +63,10 @@ void CustomTabWidget::setupGlider()
     m_gliderAnimation->setEasingCurve(QEasingCurve::OutCubic);
 }
 
-int CustomTabWidget::addTab(QWidget *widget, const QString &label)
+int ZTabWidget::addTab(QWidget *widget, const QString &label)
 {
-    return addTab(widget, QIcon(), label);
-}
-
-int CustomTabWidget::addTab(QWidget *widget, const QIcon &icon,
-                            const QString &label)
-{
-    CustomTab *tab = new CustomTab(label, m_tabBar);
-    if (!icon.isNull()) {
-        tab->setIcon(icon);
-    }
-    connect(tab, &CustomTab::clicked, this, &CustomTabWidget::onTabClicked);
+    ZTab *tab = new ZTab(label, m_tabBar);
+    connect(tab, &ZTab::clicked, this, &ZTabWidget::onTabClicked);
     int index = m_tabs.count();
     m_tabs.append(tab);
     m_widgets.append(widget);
@@ -97,23 +75,10 @@ int CustomTabWidget::addTab(QWidget *widget, const QIcon &icon,
     m_stackedWidget->addWidget(widget);
     m_buttonGroup->addButton(tab, index);
 
-    // Set first tab as checked by default
-    if (index == 0) {
-        tab->setChecked(true);
-        // Position glider immediately for first tab to prevent shifting
-        QTimer::singleShot(0, [this, tab]() {
-            m_glider->setFixedSize(tab->size().width(), 2);
-            int targetX = tab->pos().x();
-            int targetY = tab->pos().y() + tab->size().height() - 2;
-            m_glider->move(targetX, targetY);
-            m_glider->show();
-        });
-    }
-
     return index;
 }
 
-void CustomTabWidget::setCurrentIndex(int index)
+void ZTabWidget::setCurrentIndex(int index)
 {
     if (index < 0 || index >= m_tabs.count() || index == m_currentIndex) {
         return;
@@ -128,11 +93,27 @@ void CustomTabWidget::setCurrentIndex(int index)
     emit currentChanged(index);
 }
 
-void CustomTabWidget::finalizeStyles() { updateTabStyles(); }
+void ZTabWidget::finalizeStyles()
+{
+    ZTab *tab = m_tabs[0];
+    if (tab) {
+        tab->setChecked(true);
+        QTimer::singleShot(0, [this, tab]() {
+            if (tab) {
+                m_glider->setFixedSize(tab->size().width(), 2);
+                int targetX = tab->pos().x();
+                int targetY = tab->pos().y() + tab->size().height() - 2;
+                m_glider->move(targetX, targetY);
+                m_glider->show();
+            }
+        });
+    }
+    updateTabStyles();
+}
 
-int CustomTabWidget::currentIndex() const { return m_currentIndex; }
+int ZTabWidget::currentIndex() const { return m_currentIndex; }
 
-QWidget *CustomTabWidget::widget(int index) const
+QWidget *ZTabWidget::widget(int index) const
 {
     if (index < 0 || index >= m_widgets.count()) {
         return nullptr;
@@ -140,9 +121,9 @@ QWidget *CustomTabWidget::widget(int index) const
     return m_widgets[index];
 }
 
-void CustomTabWidget::onTabClicked()
+void ZTabWidget::onTabClicked()
 {
-    CustomTab *clickedTab = qobject_cast<CustomTab *>(sender());
+    ZTab *clickedTab = qobject_cast<ZTab *>(sender());
     if (!clickedTab)
         return;
 
@@ -152,12 +133,12 @@ void CustomTabWidget::onTabClicked()
     }
 }
 
-void CustomTabWidget::animateGlider(int index)
+void ZTabWidget::animateGlider(int index)
 {
     if (index < 0 || index >= m_tabs.count())
         return;
 
-    CustomTab *targetTab = m_tabs[index];
+    ZTab *targetTab = m_tabs[index];
     if (!targetTab)
         return;
 
@@ -171,7 +152,8 @@ void CustomTabWidget::animateGlider(int index)
     // Position glider at the bottom of the target tab
     int targetX = targetTabPos.x();
     int targetY =
-        targetTabPos.y() + targetTabSize.height() + 6; // Position at bottom
+        // targetTabPos.y() + targetTabSize.height() + 6; // Position at bottom
+        targetTabPos.y() + targetTabSize.height() - 2; // Position at bottom
 
     m_gliderAnimation->stop();
     m_gliderAnimation->setStartValue(m_glider->pos());
@@ -179,12 +161,12 @@ void CustomTabWidget::animateGlider(int index)
     m_gliderAnimation->start();
 }
 
-void CustomTabWidget::updateTabStyles()
+void ZTabWidget::updateTabStyles()
 {
     for (int i = 0; i < m_tabs.count(); ++i) {
-        CustomTab *tab = m_tabs[i];
+        ZTab *tab = m_tabs[i];
         if (tab->isChecked()) {
-            tab->setStyleSheet("CustomTab {"
+            tab->setStyleSheet("ZTab {"
                                "  color: #185ee0;"
                                //    "  color: #d7e1f4ff;"
                                "  font-weight: 500;"
@@ -193,11 +175,11 @@ void CustomTabWidget::updateTabStyles()
                                "  outline: none;"
                                "  background-color: transparent;"
                                "}"
-                               "CustomTab:hover {"
+                               "ZTab:hover {"
                                "  background-color: transparent;"
                                "}");
         } else {
-            tab->setStyleSheet("CustomTab {"
+            tab->setStyleSheet("ZTab {"
                                "  color: #666;"
                                //    "  color: #2b5693;"
                                "  font-weight: 500;"
@@ -206,7 +188,7 @@ void CustomTabWidget::updateTabStyles()
                                "  outline: none;"
                                "  background-color: transparent;"
                                "}"
-                               "CustomTab:hover {"
+                               "ZTab:hover {"
                                "  color: #185ee0;"
                                "  background-color: transparent;"
                                "}");
@@ -214,13 +196,11 @@ void CustomTabWidget::updateTabStyles()
     }
 }
 
-void CustomTabWidget::resizeEvent(QResizeEvent *event)
+// Update glider position when widget is resized
+void ZTabWidget::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-
-    // Update glider position when widget is resized
     if (m_currentIndex >= 0 && m_currentIndex < m_tabs.count()) {
-        // Use a timer to ensure layout has been updated
-        QTimer::singleShot(0, [this]() { animateGlider(m_currentIndex); });
+        animateGlider(m_currentIndex);
     }
 }

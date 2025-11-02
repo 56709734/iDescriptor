@@ -2,10 +2,10 @@
 #define MAINWINDOW_H
 #include "ZDownloader.h"
 #include "ZUpdater.h"
-#include "customtabwidget.h"
 #include "devicemanagerwidget.h"
 #include "iDescriptor.h"
 #include "libirecovery.h"
+#include "ztabwidget.h"
 #include <QLabel>
 #include <QMainWindow>
 #include <QStackedWidget>
@@ -25,6 +25,7 @@ public:
     static MainWindow *sharedInstance();
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    ZUpdater *m_updater = nullptr;
 public slots:
     void updateNoDevicesConnected();
 
@@ -32,10 +33,9 @@ private:
     void createMenus();
 
     Ui::MainWindow *ui;
-    CustomTabWidget *m_customTabWidget;
+    ZTabWidget *m_ZTabWidget;
     DeviceManagerWidget *m_deviceManager;
     QStackedWidget *m_mainStackedWidget;
     QLabel *m_connectedDeviceCountLabel;
-    ZUpdater *m_updater = nullptr;
 };
 #endif // MAINWINDOW_H

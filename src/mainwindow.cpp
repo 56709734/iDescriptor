@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "customtabwidget.h"
 #include "detailwindow.h"
 #include "ifusediskunmountbutton.h"
 #include "ifusemanager.h"
@@ -24,6 +23,7 @@
 #include "appcontext.h"
 #include "settingsmanager.h"
 #include <QApplication>
+#include <QDesktopServices>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -121,16 +121,15 @@ MainWindow::MainWindow(QWidget *parent)
     // setWindowIcon(QIcon(":/resources/icons/icon.png"));
 
     // Create custom tab widget
-    m_customTabWidget = new CustomTabWidget(this);
-    m_customTabWidget->setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea,
-                                    false);
+    m_ZTabWidget = new ZTabWidget(this);
+    m_ZTabWidget->setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea, false);
 
     setContentsMargins(0, 0, 0, 0);
 #ifdef __APPLE__
     setupMacOSWindow(this);
     setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea, false);
 #endif
-    setCentralWidget(m_customTabWidget);
+    setCentralWidget(m_ZTabWidget);
 
     // Create device manager and stacked widget for main tab
     m_mainStackedWidget = new QStackedWidget();
@@ -165,18 +164,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_deviceManager, &DeviceManagerWidget::updateNoDevicesConnected,
             this, &MainWindow::updateNoDevicesConnected);
 
-    // Add tabs with icons
-    QIcon deviceIcon(":/resources/icons/MdiLightningBolt.png");
-    m_customTabWidget->addTab(m_mainStackedWidget, deviceIcon, "iDevice");
-    m_customTabWidget->addTab(AppsWidget::sharedInstance(), "Apps");
-    m_customTabWidget->addTab(new ToolboxWidget(this), "Toolbox");
+    m_ZTabWidget->addTab(m_mainStackedWidget, "iDevice");
+    m_ZTabWidget->addTab(AppsWidget::sharedInstance(), "Apps");
+    m_ZTabWidget->addTab(new ToolboxWidget(this), "Toolbox");
 
     auto *jailbrokenWidget = new JailbrokenWidget(this);
-    m_customTabWidget->addTab(jailbrokenWidget, "Jailbroken");
-    m_customTabWidget->finalizeStyles();
+    m_ZTabWidget->addTab(jailbrokenWidget, "Jailbroken");
+    m_ZTabWidget->finalizeStyles();
 
     // connect(
-    //     m_customTabWidget, &CustomTabWidget::currentChanged, this,
+    //     m_ZTabWidget, &ZTabWidget::currentChanged, this,
     //     [this, jailbrokenWidget](int index) {
     //         if (index == 3) { // Jailbroken tab
     //             jailbrokenWidget->initWidget();

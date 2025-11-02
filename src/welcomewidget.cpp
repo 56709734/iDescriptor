@@ -1,4 +1,5 @@
 #include "welcomewidget.h"
+#include "iDescriptor-ui.h"
 #include "responsiveqlabel.h"
 #include <QApplication>
 #include <QDesktopServices>
@@ -68,6 +69,10 @@ void WelcomeWidget::setupUI()
         createStyledLabel("Found an issue? Report it on GitHub", 12, false);
     m_githubLabel->setAlignment(Qt::AlignCenter);
     m_githubLabel->setCursor(Qt::PointingHandCursor);
+    connect(m_githubLabel, &ZLabel::clicked, this, []() {
+        QDesktopServices::openUrl(
+            QUrl("https://github.com/uncor3/iDescriptor"));
+    });
 
     // Make it look like a link
     QPalette githubPalette = m_githubLabel->palette();
@@ -84,13 +89,13 @@ void WelcomeWidget::setupUI()
     m_mainLayout->addStretch(1);
 
     // Set minimum size
-    setMinimumSize(600, 500);
+    // setMinimumSize(600, 500);
 }
 
-QLabel *WelcomeWidget::createStyledLabel(const QString &text, int fontSize,
+ZLabel *WelcomeWidget::createStyledLabel(const QString &text, int fontSize,
                                          bool isBold)
 {
-    QLabel *label = new QLabel(text);
+    ZLabel *label = new ZLabel(text);
 
     QFont font = label->font();
     if (fontSize > 0) {
@@ -104,17 +109,4 @@ QLabel *WelcomeWidget::createStyledLabel(const QString &text, int fontSize,
     label->setWordWrap(true);
 
     return label;
-}
-
-bool WelcomeWidget::eventFilter(QObject *watched, QEvent *event)
-{
-    if (watched == m_githubLabel && event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            QDesktopServices::openUrl(
-                QUrl("https://github.com/uncor3/iDescriptor"));
-            return true;
-        }
-    }
-    return QWidget::eventFilter(watched, event);
 }
