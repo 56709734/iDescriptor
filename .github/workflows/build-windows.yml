@@ -122,16 +122,15 @@ jobs:
           pushd lxqt-build-tools
           mkdir build && cd build
           cmake .. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
-          make
-          make install
+          cmake --install . --prefix "C:\lxqt"
           popd
 
           git clone https://github.com/uncor3/qtermwidget.git
           pushd qtermwidget
           mkdir build && cd build
-          cmake .. -DCMAKE_PREFIX_PATH="$Qt6_DIR"
-          make
-          make install
+          cmake .. -DCMAKE_PREFIX_PATH="$Qt6_DIR;C:\lxqt" -DCMAKE_INSTALL_PREFIX="C:\lxqt"
+          cmake --build . --parallel
+          cmake --install .
           popd
 
       - name: Build libimobiledevice suite (versioned tarballs)
