@@ -143,6 +143,8 @@ export QML_SOURCES_PATHS="./qml"
  ./linuxdeploy-x86_64.AppImage \
             --appdir ./AppDir \
             --desktop-file AppDir/usr/share/applications/iDescriptor.desktop \
-	        --plugin qt \
+            --executable "$APPDIR/usr/lib/gstreamer-1.0/gst-plugin-scanner" \
+            --executable "$APPDIR/usr/lib/gstreamer-1.0/gst-ptp-helper" \
+            --plugin qt \
             --exclude-library libGL,libGLX,libEGL,libOpenGL,libdrm,libva,libvdpau,libxcb,libxcb-glx,libxcb-dri2,libxcb-dri3,libX11,libXext,libXrandr,libXrender,libXfixes,libXau,libXdmcp,libqsqlmimer,libmysqlclient,libmysqlclient \
-            --output appimage \
+            --output appimage
