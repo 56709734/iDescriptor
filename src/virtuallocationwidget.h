@@ -20,11 +20,14 @@
 #ifndef VIRTUAL_LOCATION_H
 #define VIRTUAL_LOCATION_H
 
+#include "devdiskimagehelper.h"
 #include "iDescriptor.h"
+#include <QGroupBox>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QQuickWidget>
 #include <QTimer>
+#include <QVBoxLayout>
 #include <QWidget>
 
 class VirtualLocation : public QWidget
@@ -47,8 +50,14 @@ private slots:
     void onMapCenterChanged();
     void onApplyClicked();
     void updateMapFromInputs();
+    void onRecentLocationClicked(double latitude, double longitude);
 
 private:
+    void loadRecentLocations(QVBoxLayout *layout);
+    void refreshRecentLocations();
+    void addLocationButtons(QLayout *layout,
+                            QList<QVariantMap> recentLocations);
+
     QQuickWidget *m_quickWidget;
     QLineEdit *m_latitudeEdit;
     QLineEdit *m_longitudeEdit;
@@ -56,6 +65,8 @@ private:
     QTimer m_updateTimer;
     bool m_updatingFromInput = false;
     iDescriptorDevice *m_device;
+    QVBoxLayout *m_rightLayout = nullptr;
+    QGroupBox *m_recentGroup = nullptr;
 };
 
 #endif // VIRTUAL_LOCATION_H

@@ -20,6 +20,7 @@
 #include "settingsmanager.h"
 #include "settingswidget.h"
 #include <QDebug>
+#include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
 
@@ -57,6 +58,17 @@ SettingsManager::SettingsManager(QObject *parent) : QObject{parent}
 QString SettingsManager::devdiskimgpath() const
 {
     return downloadPath(); // Use the new downloadPath method
+}
+
+QString SettingsManager::mkDevDiskImgPath() const
+{
+    QString path = devdiskimgpath();
+    QDir dir(path);
+    if (!dir.exists()) {
+        dir.mkpath(path);
+        return path;
+    }
+    return path;
 }
 
 // Settings implementation
@@ -291,4 +303,58 @@ void SettingsManager::clearKeys(const QString &keyPrefix)
     m_settings->sync();
 
     emit favoritePlacesChanged();
+}
+
+void SettingsManager::saveRecentLocation(double latitude, double longitude,
+                                         const QString &name)
+{
+    // Get existing recent locations
+    QList<QVariantMap> recentLocations = getRecentLocations();
+
+    // Create new location entry
+    QVariantMap newLocation;
+    newLocation["latitude"] = latitude;
+    newLocation["longitude"] = longitude;
+
+    // Add to front of list
+    recentLocations.prepend(newLocation);
+
+    // Keep only last 10 locations
+    while (recentLocations.size() > 10) {
+        recentLocations.removeLast();
+    }
+
+    // Save to settings
+    QVariantList variantList;
+    for (const QVariantMap &loc : recentLocations) {
+        variantList.append(loc);
+    }
+
+    m_settings->setValue("recentLocations", variantList);
+    m_settings->sync();
+
+    qDebug() << "Saved recent location:" << latitude << "," << longitude;
+
+    emit recentLocationsChanged();
+}
+
+QList<QVariantMap> SettingsManager::getRecentLocations() const
+{
+    QList<QVariantMap> recentLocations;
+
+    QVariantList variantList = m_settings->value("recentLocations").toList();
+
+    for (const QVariant &item : variantList) {
+        if (item.canConvert<QVariantMap>()) {
+            recentLocations.append(item.toMap());
+        }
+    }
+
+    return recentLocations;
+}
+
+void SettingsManager::clearRecentLocations()
+{
+    m_settings->remove("recentLocations");
+    m_settings->sync();
 }

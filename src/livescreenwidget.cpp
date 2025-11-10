@@ -83,6 +83,12 @@ LiveScreenWidget::LiveScreenWidget(iDescriptorDevice *device, QWidget *parent)
     connect(m_timer, &QTimer::timeout, this,
             &LiveScreenWidget::updateScreenshot);
 
+    // Defer the initialization to allow the main widget to show first
+    QTimer::singleShot(0, this, &LiveScreenWidget::startInitialization);
+}
+
+void LiveScreenWidget::startInitialization()
+{
     const bool initializeScreenshotServiceSuccess =
         initializeScreenshotService(false);
     if (initializeScreenshotServiceSuccess)

@@ -57,9 +57,8 @@ PhotoModel::PhotoModel(iDescriptorDevice *device, FilterType filterType,
             &PhotoModel::requestThumbnail, Qt::QueuedConnection);
 }
 
-PhotoModel::~PhotoModel()
+void PhotoModel::clear()
 {
-    qDebug() << "PhotoModel destructor called";
     // Clean up any active watchers
     for (auto *watcher : m_activeLoaders.values()) {
         if (watcher) {
@@ -71,6 +70,12 @@ PhotoModel::~PhotoModel()
     m_activeLoaders.clear();
     m_loadingPaths.clear();
     m_thumbnailCache.clear();
+}
+
+PhotoModel::~PhotoModel()
+{
+    qDebug() << "PhotoModel destructor called";
+    clear();
 }
 
 QPixmap PhotoModel::generateVideoThumbnailFFmpeg(iDescriptorDevice *device,
@@ -443,31 +448,6 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
 
     default:
         return QVariant();
-    }
-}
-
-void PhotoModel::setThumbnailSize(const QSize &size)
-{
-    if (m_thumbnailSize != size) {
-        m_thumbnailSize = size;
-        // Clear cache when size changes
-        clearCache();
-    }
-}
-
-void PhotoModel::clearCache()
-{
-    m_thumbnailCache.clear();
-
-    // Reset all requested flags
-    for (PhotoInfo &info : m_photos) {
-        info.thumbnailRequested = false;
-    }
-
-    // Notify view to refresh
-    if (!m_photos.isEmpty()) {
-        emit dataChanged(createIndex(0, 0), createIndex(m_photos.size() - 1, 0),
-                         {Qt::DecorationRole});
     }
 }
 
@@ -897,19 +877,8 @@ PhotoInfo::FileType PhotoModel::determineFileType(const QString &fileName) const
 void PhotoModel::setAlbumPath(const QString &albumPath)
 {
     if (m_albumPath != albumPath) {
-        // Clear cache when switching albums to prevent memory buildup
-        clearCache();
-
-        // Cancel any pending thumbnail requests
-        for (auto *watcher : m_activeLoaders.values()) {
-            if (watcher) {
-                watcher->cancel();
-                watcher->waitForFinished();
-                watcher->deleteLater();
-            }
-        }
-        m_activeLoaders.clear();
-        m_loadingPaths.clear();
+        qDebug() << "Setting new album path:" << albumPath;
+        clear();
 
         m_albumPath = albumPath;
         populatePhotoPaths();

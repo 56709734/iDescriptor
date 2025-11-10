@@ -36,7 +36,7 @@ public:
     explicit DevDiskManager(QObject *parent = nullptr);
     static DevDiskManager *sharedInstance();
 
-    QList<ImageInfo> parseImageList(int deviceMajorVersion,
+    QList<ImageInfo> parseImageList(QString path, int deviceMajorVersion,
                                     int deviceMinorVersion,
                                     const char *mounted_sig,
                                     uint64_t mounted_sig_len);
@@ -61,7 +61,8 @@ public:
     QByteArray getImageListData() const { return m_imageListJsonData; }
     GetMountedImageResult getMountedImage(const char *udid);
     bool mountCompatibleImage(iDescriptorDevice *device);
-    bool downloadCompatibleImage(iDescriptorDevice *device);
+    bool downloadCompatibleImage(iDescriptorDevice *device,
+                                 std::function<void(bool)> callback);
 
 signals:
     void imageListFetched(bool success,
@@ -93,8 +94,9 @@ private:
     QMap<QString, QMap<QString, QString>> parseDiskDir();
     QList<ImageInfo>
     getImagesSorted(QMap<QString, QMap<QString, QString>> imageFiles,
-                    int deviceMajorVersion, int deviceMinorVersion,
-                    const char *mounted_sig, uint64_t mounted_sig_len);
+                    QString path, int deviceMajorVersion,
+                    int deviceMinorVersion, const char *mounted_sig,
+                    uint64_t mounted_sig_len);
     void populateImageList();
 };
 

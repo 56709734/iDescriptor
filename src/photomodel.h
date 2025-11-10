@@ -59,10 +59,6 @@ public:
     QVariant data(const QModelIndex &index,
                   int role = Qt::DisplayRole) const override;
 
-    // Thumbnail management
-    void setThumbnailSize(const QSize &size);
-    void clearCache();
-
     // Album management
     void setAlbumPath(const QString &albumPath);
     void refreshPhotos();
@@ -89,6 +85,7 @@ public:
     static QPixmap loadThumbnailFromDevice(iDescriptorDevice *device,
                                            const QString &filePath,
                                            const QSize &size);
+    void clear();
 signals:
     void thumbnailNeedsToBeLoaded(int index);
     void exportRequested(const QStringList &filePaths);

@@ -193,14 +193,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->statusbar->addWidget(m_connectedDeviceCountLabel);
     ui->statusbar->setContentsMargins(0, 0, 0, 0);
-    ui->statusbar->addPermanentWidget(githubButton);
-    ui->statusbar->addPermanentWidget(settingsButton);
-
     QLabel *appVersionLabel = new QLabel(QString("v%1").arg(APP_VERSION));
     appVersionLabel->setContentsMargins(5, 0, 5, 0);
     appVersionLabel->setStyleSheet(
         "QLabel:hover { background-color : #13131319; }");
     ui->statusbar->addPermanentWidget(appVersionLabel);
+    ui->statusbar->addPermanentWidget(githubButton);
+    ui->statusbar->addPermanentWidget(settingsButton);
+
 #ifdef __linux__
     QList<QString> mounted_iFusePaths = iFuseManager::getMountPoints();
 

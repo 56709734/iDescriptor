@@ -17,38 +17,36 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVESCREEN_H
-#define LIVESCREEN_H
+#ifndef CRED_DIALOG_H
+#define CRED_DIALOG_H
 
-#include "iDescriptor.h"
+#include <QCheckBox>
+#include <QDialog>
 #include <QLabel>
-#include <QTimer>
-#include <QWidget>
-#include <libimobiledevice/libimobiledevice.h>
-#include <libimobiledevice/screenshotr.h>
+#include <QPushButton>
+#include <QVBoxLayout>
 
-class LiveScreenWidget : public QWidget
+class CredDialog : public QDialog
 {
     Q_OBJECT
+
 public:
-    explicit LiveScreenWidget(iDescriptorDevice *device,
-                              QWidget *parent = nullptr);
-    ~LiveScreenWidget();
+    explicit CredDialog(QWidget *parent = nullptr);
+    ~CredDialog();
+
+private slots:
+    void onOkClicked();
+    void onSkipSigningInClicked();
 
 private:
-    bool initializeScreenshotService(bool notify);
-    void updateScreenshot();
-    void startCapturing();
+    void setupUI();
 
-    iDescriptorDevice *m_device;
-    QTimer *m_timer;
-    QLabel *m_imageLabel;
-    QLabel *m_statusLabel;
-    screenshotr_client_t m_shotrClient;
-    int m_fps;
-
-private:
-    void startInitialization(); // Add this line
+    QVBoxLayout *m_mainLayout;
+    QPushButton *m_okButton;
+    QPushButton *m_skipSigningInButton;
+    QLabel *m_titleLabel;
+    QLabel *m_descriptionLabel;
+    QCheckBox *m_dontShowAgainCheckbox;
 };
 
-#endif // LIVESCREEN_H
+#endif // CRED_DIALOG_H

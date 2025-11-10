@@ -20,6 +20,7 @@
 #include "devdiskimagehelper.h"
 #include "devdiskmanager.h"
 #include "qprocessindicator.h"
+#include "settingsmanager.h"
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -31,10 +32,9 @@ DevDiskImageHelper::DevDiskImageHelper(iDescriptorDevice *device,
     : QDialog(parent), m_device(device), m_isDownloading(false),
       m_isMounting(false)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle("Developer Disk Image - iDescriptor");
     setupUI();
-
-    QTimer::singleShot(0, this, &DevDiskImageHelper::start);
 }
 
 void DevDiskImageHelper::setupUI()
@@ -96,12 +96,18 @@ void DevDiskImageHelper::start()
     unsigned int deviceMajorVersion = (device_version >> 16) & 0xFF;
     unsigned int deviceMinorVersion = (device_version >> 8) & 0xFF;
 
-    // we dont have developer disk images for ios 6 and below
+    // FIXME:we dont have developer disk images for ios 6 and below
     if (deviceMajorVersion > 5) {
         // TODO: maybe check isMountAvailable and finishWithFailure if false
         const bool isMountAvailable =
-            DevDiskManager::sharedInstance()->downloadCompatibleImage(m_device);
-        QTimer::singleShot(500, this, &DevDiskImageHelper::checkAndMount);
+            DevDiskManager::sharedInstance()->downloadCompatibleImage(
+                m_device, [this](bool success) {
+                    if (success) {
+                        checkAndMount();
+                    } else {
+                        finishWithError("Failed to download compatible image.");
+                    }
+                });
     } else {
         finishWithSuccess();
         return;
@@ -122,7 +128,6 @@ void DevDiskImageHelper::checkAndMount()
 
     // If image is already mounted
     if (!result.sig.empty()) {
-        showStatus("Developer disk image already mounted");
         finishWithSuccess();
         return;
     }
@@ -132,6 +137,7 @@ void DevDiskImageHelper::checkAndMount()
 
 void DevDiskImageHelper::onMountButtonClicked()
 {
+    QString path = SettingsManager::sharedInstance()->mkDevDiskImgPath();
     m_mountButton->setVisible(false);
     m_loadingIndicator->start();
     m_isMounting = true;
@@ -142,7 +148,7 @@ void DevDiskImageHelper::onMountButtonClicked()
     unsigned int deviceMinorVersion = (device_version >> 8) & 0xFF;
 
     QList<ImageInfo> images = DevDiskManager::sharedInstance()->parseImageList(
-        deviceMajorVersion, deviceMinorVersion, "", 0);
+        path, deviceMajorVersion, deviceMinorVersion, "", 0);
 
     // Check if compatible image is downloaded
     bool hasDownloadedImage = false;

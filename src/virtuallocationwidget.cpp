@@ -22,6 +22,7 @@
 #include "devdiskimagehelper.h"
 #include "devdiskmanager.h"
 #include "iDescriptor.h"
+#include "settingsmanager.h"
 #include <QDebug>
 #include <QDoubleValidator>
 #include <QGeoCoordinate>
@@ -44,6 +45,19 @@
 VirtualLocation::VirtualLocation(iDescriptorDevice *device, QWidget *parent)
     : QWidget{parent}, m_device(device)
 {
+    unsigned int device_version = idevice_get_device_version(m_device->device);
+    unsigned int deviceMajorVersion = (device_version >> 16) & 0xFF;
+
+    if (deviceMajorVersion > 16) {
+        QMessageBox::warning(
+            this, "Unsupported iOS Version",
+            "Virtual Location feature requires iOS 16 or earlier.\n"
+            "Your device is running iOS " +
+                QString::number(deviceMajorVersion) +
+                ", which is not yet supported.");
+        QTimer::singleShot(0, this, &QWidget::close);
+        return;
+    }
     setWindowTitle("Virtual Location - iDescriptor");
     // Create the main layout
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
@@ -54,17 +68,17 @@ VirtualLocation::VirtualLocation(iDescriptorDevice *device, QWidget *parent)
     QWidget *rightPanel = new QWidget();
     rightPanel->setFixedWidth(250);
 
-    QVBoxLayout *rightLayout = new QVBoxLayout(rightPanel);
-    rightLayout->setContentsMargins(15, 15, 15, 15);
-    rightLayout->setSpacing(10);
+    m_rightLayout = new QVBoxLayout(rightPanel);
+    m_rightLayout->setContentsMargins(15, 15, 15, 15);
+    m_rightLayout->setSpacing(10);
 
     // Title
     QLabel *titleLabel = new QLabel("Virtual Location Settings");
     titleLabel->setStyleSheet("margin-bottom: 10px;");
-    rightLayout->addWidget(titleLabel);
+    m_rightLayout->addWidget(titleLabel);
 
     QGroupBox *coordGroup = new QGroupBox("Coordinates");
-    rightLayout->addWidget(coordGroup);
+    m_rightLayout->addWidget(coordGroup);
 
     QVBoxLayout *coordLayout = new QVBoxLayout(coordGroup);
 
@@ -89,16 +103,24 @@ VirtualLocation::VirtualLocation(iDescriptorDevice *device, QWidget *parent)
     coordLayout->addWidget(m_longitudeEdit);
 
     // Add some spacing
-    rightLayout->addItem(
+    m_rightLayout->addItem(
         new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed));
 
     // Apply button
-    m_applyButton = new QPushButton("Apply Settings");
+    m_applyButton = new QPushButton("Apply Location");
     m_applyButton->setDefault(true);
-    rightLayout->addWidget(m_applyButton);
+    m_rightLayout->addWidget(m_applyButton);
+
+    // Recent locations section
+    loadRecentLocations(m_rightLayout);
 
     // Add stretch to push everything to the top
-    rightLayout->addStretch();
+    m_rightLayout->addStretch();
+
+    // Connect to recent locations changes
+    connect(SettingsManager::sharedInstance(),
+            &SettingsManager::recentLocationsChanged, this,
+            &VirtualLocation::refreshRecentLocations);
 
     // Create map widget
     m_quickWidget = new QQuickWidget(this);
@@ -142,20 +164,7 @@ VirtualLocation::VirtualLocation(iDescriptorDevice *device, QWidget *parent)
                 }
             });
 
-    DevDiskManager::sharedInstance()->downloadCompatibleImage(m_device);
-    unsigned int device_version = idevice_get_device_version(m_device->device);
-    unsigned int deviceMajorVersion = (device_version >> 16) & 0xFF;
-
-    if (deviceMajorVersion > 16) {
-        QMessageBox::warning(
-            this, "Unsupported iOS Version",
-            "Virtual Location feature requires iOS 16 or earlier.\n"
-            "Your device is running iOS " +
-                QString::number(deviceMajorVersion) +
-                ", which is not yet supported.");
-        QTimer::singleShot(0, this, &QWidget::close);
-        return;
-    }
+    // DevDiskManager::sharedInstance()->downloadCompatibleImage(m_device);
 }
 
 void VirtualLocation::onQuickWidgetStatusChanged(QQuickWidget::Status status)
@@ -290,6 +299,7 @@ void VirtualLocation::updateInputsFromMap(double latitude, double longitude)
 
 void VirtualLocation::onApplyClicked()
 {
+    m_applyButton->setEnabled(false);
     bool latOk, lonOk;
     double latitude = m_latitudeEdit->text().toDouble(&latOk);
     double longitude = m_longitudeEdit->text().toDouble(&lonOk);
@@ -298,15 +308,16 @@ void VirtualLocation::onApplyClicked()
         QMessageBox::warning(
             this, "Invalid Input",
             "Please enter valid latitude and longitude values.");
+        m_applyButton->setEnabled(true);
         return;
     }
-
-    // Create and show the helper dialog
-    auto *helper = new DevDiskImageHelper(m_device, this);
-
-    connect(helper, &DevDiskImageHelper::mountingCompleted, this,
-            [this, latitude, longitude, helper](bool success) {
-                helper->deleteLater();
+    DevDiskImageHelper *devDiskImageHelper =
+        new DevDiskImageHelper(m_device, this);
+    connect(devDiskImageHelper, &DevDiskImageHelper::mountingCompleted, this,
+            [this, latitude, longitude, devDiskImageHelper](bool success) {
+                if (devDiskImageHelper) {
+                    devDiskImageHelper->deleteLater();
+                }
 
                 if (!success) {
                     return;
@@ -318,12 +329,6 @@ void VirtualLocation::onApplyClicked()
 
                 // Visual feedback
                 m_applyButton->setText("Applied!");
-                m_applyButton->setEnabled(false);
-
-                QTimer::singleShot(1000, this, [this]() {
-                    m_applyButton->setText("Apply Settings");
-                    m_applyButton->setEnabled(true);
-                });
 
                 bool locationSuccess = set_location(
                     m_device->device,
@@ -336,10 +341,148 @@ void VirtualLocation::onApplyClicked()
                     QMessageBox::warning(this, "Error",
                                          "Failed to set location on device");
                 } else {
+                    SettingsManager::sharedInstance()->saveRecentLocation(
+                        latitude, longitude);
+
                     QMessageBox::information(this, "Success",
                                              "Location applied successfully!");
                 }
             });
+    connect(
+        devDiskImageHelper, &DevDiskImageHelper::destroyed, this,
+        [this]() {
+            QTimer::singleShot(1000, this, [this]() {
+                m_applyButton->setText("Apply Location");
+                m_applyButton->setEnabled(true);
+            });
+        },
+        Qt::SingleShotConnection);
+    devDiskImageHelper->start();
+}
 
-    helper->start();
+void VirtualLocation::loadRecentLocations(QVBoxLayout *layout)
+{
+    QList<QVariantMap> recentLocations =
+        SettingsManager::sharedInstance()->getRecentLocations();
+
+    if (recentLocations.isEmpty()) {
+        return; // Don't render anything if no recent locations
+    }
+
+    layout->addItem(
+        new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed));
+
+    m_recentGroup = new QGroupBox("Recent Locations");
+    layout->addWidget(m_recentGroup);
+
+    // A group box needs a layout to contain its children
+    QVBoxLayout *groupBoxLayout = new QVBoxLayout(m_recentGroup);
+
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    groupBoxLayout->addWidget(scrollArea);
+
+    QWidget *scrollContent = new QWidget();
+    scrollArea->setWidget(scrollContent);
+
+    // This layout is for the content widget
+    QVBoxLayout *recentLayout = new QVBoxLayout(scrollContent);
+
+    addLocationButtons(recentLayout, recentLocations);
+}
+
+void VirtualLocation::onRecentLocationClicked(double latitude, double longitude)
+{
+    // Update input fields
+    m_latitudeEdit->setText(QString::number(latitude, 'f', 6));
+    m_longitudeEdit->setText(QString::number(longitude, 'f', 6));
+
+    // Update map
+    updateMapFromInputs();
+
+    qDebug() << "Recent location clicked:" << latitude << "," << longitude;
+}
+
+void VirtualLocation::refreshRecentLocations()
+{
+    if (!m_recentGroup) {
+        return;
+    }
+
+    // Get the group box's layout
+    QVBoxLayout *groupBoxLayout =
+        qobject_cast<QVBoxLayout *>(m_recentGroup->layout());
+    if (!groupBoxLayout) {
+        return;
+    }
+
+    // Get the scroll area from the group box layout
+    QScrollArea *scrollArea = nullptr;
+    if (groupBoxLayout->count() > 0) {
+        scrollArea =
+            qobject_cast<QScrollArea *>(groupBoxLayout->itemAt(0)->widget());
+    }
+
+    if (!scrollArea) {
+        return;
+    }
+
+    // Get the scroll content widget
+    QWidget *scrollContent = scrollArea->widget();
+    if (!scrollContent) {
+        return;
+    }
+
+    // Get the content layout
+    QVBoxLayout *recentLayout =
+        qobject_cast<QVBoxLayout *>(scrollContent->layout());
+    if (!recentLayout) {
+        return;
+    }
+
+    // Clear all existing buttons
+    QLayoutItem *item;
+    while ((item = recentLayout->takeAt(0)) != nullptr) {
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
+    // Reload recent locations
+    QList<QVariantMap> recentLocations =
+        SettingsManager::sharedInstance()->getRecentLocations();
+
+    if (recentLocations.isEmpty()) {
+        // Hide the group if no locations
+        m_recentGroup->hide();
+        return;
+    }
+
+    // Show the group if it was hidden
+    m_recentGroup->show();
+
+    addLocationButtons(recentLayout, recentLocations);
+}
+
+void VirtualLocation::addLocationButtons(QLayout *layout,
+                                         QList<QVariantMap> recentLocations)
+{
+    for (const QVariantMap &location : recentLocations) {
+        double latitude = location["latitude"].toDouble();
+        double longitude = location["longitude"].toDouble();
+
+        QPushButton *locationBtn =
+            new QPushButton(QString("Lat: %1\nLon: %2")
+                                .arg(latitude, 0, 'f', 4)
+                                .arg(longitude, 0, 'f', 4));
+
+        connect(locationBtn, &QPushButton::clicked, this,
+                [this, latitude, longitude]() {
+                    onRecentLocationClicked(latitude, longitude);
+                });
+
+        layout->addWidget(locationBtn);
+    }
 }

@@ -57,9 +57,16 @@ public:
     getFavoritePlaces(const QString &keyPrefix) const;
     void showSettingsDialog();
 
-    // New settings methods
+    // Recently used locations
+    void saveRecentLocation(double latitude, double longitude,
+                            const QString &name = QString());
+    QList<QVariantMap> getRecentLocations() const;
+    void clearRecentLocations();
+
     QString downloadPath() const;
     void setDownloadPath(const QString &path);
+
+    QString mkDevDiskImgPath() const;
 
     bool autoCheckUpdates() const;
     void setAutoCheckUpdates(bool enabled);
@@ -94,6 +101,7 @@ public:
 
 signals:
     void favoritePlacesChanged();
+    void recentLocationsChanged();
 
 private:
     QDialog *m_dialog;

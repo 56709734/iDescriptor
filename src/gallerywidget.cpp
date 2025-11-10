@@ -478,6 +478,7 @@ void GalleryWidget::onBackToAlbums()
 {
     // Switch back to album selection view
     m_stackedWidget->setCurrentWidget(m_albumSelectionWidget);
+    m_model->clear();
 
     // Disable controls and hide back button
     setControlsEnabled(false);

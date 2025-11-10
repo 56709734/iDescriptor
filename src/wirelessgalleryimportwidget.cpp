@@ -37,6 +37,7 @@ WirelessGalleryImportWidget::WirelessGalleryImportWidget(QWidget *parent)
       m_loadingLabel(nullptr), m_tutorialLayout(nullptr)
 {
     setupUI();
+    setMinimumSize(800, 600);
     QTimer::singleShot(100, this,
                        &WirelessGalleryImportWidget::setupTutorialVideo);
 }

@@ -23,6 +23,7 @@
 #include "appdownloaddialog.h"
 #include "appinstalldialog.h"
 #include "appstoremanager.h"
+#include "creddialog.h"
 #include "iDescriptor-ui.h"
 #include "keychaindialog.h"
 #include "logindialog.h"
@@ -228,6 +229,7 @@ void AppsWidget::setupUI()
 
 void AppsWidget::init()
 {
+    // FIXME:update url
     QUrl sponsorsUrl("http://localhost:5173/sponsors.json");
     QNetworkRequest request(sponsorsUrl);
     QNetworkReply *reply = m_networkManager->get(request);
@@ -260,8 +262,6 @@ void AppsWidget::init()
                 QJsonObject silverObj = sponsorObj["silver"].toObject();
                 QJsonObject bronzeObj = sponsorObj["bronze"].toObject();
 
-                // Store the platinum members to be used when populating
-                // the grid
                 m_platinumSponsors = platinumObj["members"].toArray();
                 m_goldSponsors = goldObj["members"].toArray();
                 m_silverSponsors = silverObj["members"].toArray();
@@ -296,6 +296,12 @@ void AppsWidget::handleInit()
             "4px; padding: 8px 16px; font-size: 14px;");
         return;
     }
+    /*
+        FIXME: ipatoolinitialze still uses the secure backends
+        when if the user rejects it, the moment he/she tries to sign in
+        prompt(keychain or secret-service whatever the backend is) will be seen
+        again
+    */
     if (!SettingsManager::sharedInstance()->useUnsecureBackend() &&
         SettingsManager::sharedInstance()->showKeychainDialog()) {
 #ifdef __APPLE__
@@ -306,9 +312,16 @@ void AppsWidget::handleInit()
             showDefaultApps();
             return;
         }
+#else
+        CredDialog dialog(this);
+        if (dialog.exec() == QDialog::Rejected) {
+            // pass empty QJsonObject to skip signing in
+            onAppStoreInitialized(QJsonObject());
+            showDefaultApps();
+            return;
+        }
 #endif
     }
-    // todo also change in the ipatoolinitialze as the backend is alrady enabled
     onAppStoreInitialized(m_manager->getAccountInfo());
     showDefaultApps();
 }
@@ -437,7 +450,6 @@ void AppsWidget::populateDefaultApps()
     int col = 0;
     const int maxCols = 3;
 
-    // Helper lambda to advance the grid position
     auto advanceGridPos = [&]() {
         col++;
         if (col >= maxCols) {
@@ -612,7 +624,6 @@ void AppsWidget::createAppCard(
         QUrl url(logoUrl);
         QNetworkRequest request(url);
         QNetworkReply *reply = m_networkManager->get(request);
-        // Use Qt's parent-child relationship to auto-cleanup
         connect(
             reply, &QNetworkReply::finished, this, [reply, safeIconLabel]() {
                 if (reply->error() == QNetworkReply::NoError && safeIconLabel) {
@@ -638,7 +649,6 @@ void AppsWidget::createAppCard(
                 }
                 reply->deleteLater();
             });
-        // Ensure reply is deleted if iconLabel is destroyed
         connect(iconLabel, &QObject::destroyed, reply, &QNetworkReply::abort);
     } else if (!bundleId.isEmpty()) {
         fetchAppIconFromApple(

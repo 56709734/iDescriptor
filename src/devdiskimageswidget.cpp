@@ -195,9 +195,10 @@ void DevDiskImagesWidget::displayImages()
     qDebug() << "Device version:" << deviceMajorVersion << "."
              << deviceMinorVersion << "displayImages";
     // Parse images using manager
+    QString path = SettingsManager::sharedInstance()->mkDevDiskImgPath();
     QList<ImageInfo> allImages =
         DevDiskManager::sharedInstance()->parseImageList(
-            deviceMajorVersion, deviceMinorVersion, m_mounted_sig.c_str(),
+            path, deviceMajorVersion, deviceMinorVersion, m_mounted_sig.c_str(),
             m_mounted_sig_len);
 
     qDebug() << "Total images:" << allImages.size();
