@@ -20,6 +20,7 @@
 #ifndef PHOTOIMPORTDIALOG_H
 #define PHOTOIMPORTDIALOG_H
 
+#include "httpserver.h"
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -28,8 +29,6 @@
 #include <QPushButton>
 #include <QStringList>
 #include <QVBoxLayout>
-
-class SimpleHttpServer;
 
 class PhotoImportDialog : public QDialog
 {
@@ -59,7 +58,7 @@ private:
     QProgressBar *progressBar;
     QLabel *progressLabel;
 
-    SimpleHttpServer *m_httpServer;
+    HttpServer *m_httpServer;
 
     void setupUI();
     void generateQRCode(const QString &url);

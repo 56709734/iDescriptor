@@ -143,9 +143,9 @@ int AppContext::getConnectedDeviceCount() const
 */
 void AppContext::removeDevice(QString _udid)
 {
-    const std::string uuid = _udid.toStdString();
+    const std::string udid = _udid.toStdString();
     qDebug() << "AppContext::removeDevice device with UUID:"
-             << QString::fromStdString(uuid);
+             << QString::fromStdString(udid);
 
     if (m_pendingDevices.contains(_udid)) {
         m_pendingDevices.removeAll(_udid);
@@ -157,16 +157,16 @@ void AppContext::removeDevice(QString _udid)
                         " not found in pending devices.";
     }
 
-    if (!m_devices.contains(uuid)) {
+    if (!m_devices.contains(udid)) {
         qDebug() << "Device with UUID " + _udid +
                         " not found in normal devices.";
         return;
     }
 
-    iDescriptorDevice *device = m_devices[uuid];
-    m_devices.remove(uuid);
+    iDescriptorDevice *device = m_devices[udid];
+    m_devices.remove(udid);
 
-    emit deviceRemoved(uuid);
+    emit deviceRemoved(udid);
     emit deviceChange();
 
     std::lock_guard<std::recursive_mutex> lock(*device->mutex);
@@ -202,9 +202,9 @@ void AppContext::removeRecoveryDevice(uint64_t ecid)
 }
 #endif
 
-iDescriptorDevice *AppContext::getDevice(const std::string &uuid)
+iDescriptorDevice *AppContext::getDevice(const std::string &udid)
 {
-    return m_devices.value(uuid, nullptr);
+    return m_devices.value(udid, nullptr);
 }
 
 QList<iDescriptorDevice *> AppContext::getAllDevices()
@@ -283,9 +283,9 @@ void AppContext::setCurrentDeviceSelection(const DeviceSelection &selection)
 {
     qDebug() << "New selection -"
              << " Type:" << selection.type
-             << " UUID:" << QString::fromStdString(selection.uuid)
+             << " UDID:" << QString::fromStdString(selection.udid)
              << " ECID:" << selection.ecid << " Section:" << selection.section;
-    if (m_currentSelection.uuid == selection.uuid &&
+    if (m_currentSelection.udid == selection.udid &&
         m_currentSelection.ecid == selection.ecid &&
         m_currentSelection.section == selection.section) {
         qDebug() << "setCurrentDeviceSelection: No change in selection";

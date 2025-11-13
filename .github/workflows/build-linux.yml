@@ -67,6 +67,10 @@ jobs:
             libzip-dev \
             libssh-dev \
             libfuse3-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswscale-dev
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3

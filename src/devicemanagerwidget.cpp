@@ -318,13 +318,13 @@ void DeviceManagerWidget::onDeviceSelectionChanged(
 
     switch (selection.type) {
     case DeviceSelection::Normal:
-        if (m_deviceWidgets.contains(selection.uuid)) {
-            if (m_currentDeviceUuid != selection.uuid) {
-                setCurrentDevice(selection.uuid);
+        if (m_deviceWidgets.contains(selection.udid)) {
+            if (m_currentDeviceUuid != selection.udid) {
+                setCurrentDevice(selection.udid);
             }
 
             // Handle navigation section
-            QWidget *tabWidget = m_deviceWidgets[selection.uuid].first;
+            QWidget *tabWidget = m_deviceWidgets[selection.udid].first;
             DeviceMenuWidget *deviceMenuWidget =
                 qobject_cast<DeviceMenuWidget *>(tabWidget);
             qDebug() << "Switching to tab:" << selection.section
@@ -349,8 +349,8 @@ void DeviceManagerWidget::onDeviceSelectionChanged(
 #endif
 
     case DeviceSelection::Pending:
-        if (m_pendingDeviceWidgets.contains(selection.uuid)) {
-            QWidget *tabWidget = m_pendingDeviceWidgets[selection.uuid].first;
+        if (m_pendingDeviceWidgets.contains(selection.udid)) {
+            QWidget *tabWidget = m_pendingDeviceWidgets[selection.udid].first;
             if (tabWidget) {
                 m_stackedWidget->setCurrentWidget(tabWidget);
                 // Clear current device since we're viewing pending device

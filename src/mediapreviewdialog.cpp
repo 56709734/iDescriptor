@@ -43,6 +43,10 @@
 #include <QWheelEvent>
 #include <QtConcurrent/QtConcurrent>
 #include <QtGlobal>
+#include "appcontext.h"
+#include "iDescriptor-ui.h"
+
+
 
 MediaPreviewDialog::MediaPreviewDialog(iDescriptorDevice *device,
                                        afc_client_t afcClient,
@@ -72,6 +76,11 @@ MediaPreviewDialog::MediaPreviewDialog(iDescriptorDevice *device,
 
     setupUI();
     loadMedia();
+    connect(AppContext::sharedInstance(), &AppContext::deviceRemoved, this, [this](const std::string &udid) {
+        if (udid == m_device->udid) {
+            close();
+        }
+    });
 }
 
 MediaPreviewDialog::~MediaPreviewDialog()
@@ -481,16 +490,16 @@ void MediaPreviewDialog::setupVideoControls()
             &MediaPreviewDialog::onRepeatToggled);
 
     // Timeline slider
-    m_timelineSlider = new QSlider(Qt::Horizontal, this);
+    m_timelineSlider = new ZSlider(Qt::Horizontal, this);
     m_timelineSlider->setMinimum(0);
     m_timelineSlider->setMaximum(1000);
     m_timelineSlider->setValue(0);
     m_timelineSlider->setToolTip("Seek timeline");
-    connect(m_timelineSlider, &QSlider::valueChanged, this,
+    connect(m_timelineSlider, &ZSlider::valueChanged, this,
             &MediaPreviewDialog::onTimelineValueChanged);
-    connect(m_timelineSlider, &QSlider::sliderPressed, this,
+    connect(m_timelineSlider, &ZSlider::sliderPressed, this,
             &MediaPreviewDialog::onTimelinePressed);
-    connect(m_timelineSlider, &QSlider::sliderReleased, this,
+    connect(m_timelineSlider, &ZSlider::sliderReleased, this,
             &MediaPreviewDialog::onTimelineReleased);
 
     // Time label

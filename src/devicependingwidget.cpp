@@ -28,11 +28,12 @@ DevicePendingWidget::DevicePendingWidget(bool locked, QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(5);
 
-    m_label = new QLabel(m_locked ? "Please unlock the screen"
-                                  : "Please click on trust on the popup",
-                         this);
-
-    layout->addWidget(m_label);
+    m_label = new QLabel(
+        m_locked ? "Please unlock the screen and click on trust on the popup"
+                 : "Please click on trust on the popup",
+        this);
+    m_label->setWordWrap(true);
+    layout->addWidget(m_label, 0, Qt::AlignCenter);
     setLayout(layout);
 }
 

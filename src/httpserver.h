@@ -17,8 +17,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SIMPLEHTTPSERVER_H
-#define SIMPLEHTTPSERVER_H
+#ifndef HTTPSERVER_H
+#define HTTPSERVER_H
 
 #include <QMap>
 #include <QObject>
@@ -27,13 +27,13 @@
 #include <QTcpSocket>
 #include <QTimer>
 
-class SimpleHttpServer : public QObject
+class HttpServer : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit SimpleHttpServer(QObject *parent = nullptr);
-    ~SimpleHttpServer();
+    explicit HttpServer(QObject *parent = nullptr);
+    ~HttpServer();
 
     void start(const QStringList &files);
     void stop();
@@ -62,11 +62,9 @@ private:
                       const QString &contentType, const QByteArray &data);
     void sendFile(QTcpSocket *socket, const QString &filePath);
     void sendJsonManifest(QTcpSocket *socket);
-    void sendHtmlPage(QTcpSocket *socket);
     QString generateJsonManifest() const;
-    QString generateHtmlPage() const;
     QString getMimeType(const QString &filePath) const;
     QString getLocalIP() const;
 };
 
-#endif // SIMPLEHTTPSERVER_H
+#endif // HTTPSERVER_H

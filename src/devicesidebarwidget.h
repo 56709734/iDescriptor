@@ -113,12 +113,12 @@ signals:
 struct DeviceSelection {
     enum Type { Normal, Recovery, Pending };
     Type type;
-    std::string uuid;
+    std::string udid;
     uint64_t ecid = 0;
     QString section = "Info";
 
-    DeviceSelection(const std::string &deviceUuid, const QString &nav = "")
-        : type(Normal), uuid(deviceUuid), section(nav)
+    DeviceSelection(const std::string &deviceUdid, const QString &nav = "")
+        : type(Normal), udid(deviceUdid), section(nav)
     {
     }
     DeviceSelection(uint64_t recoveryEcid) : type(Recovery), ecid(recoveryEcid)

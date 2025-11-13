@@ -88,12 +88,9 @@ void SettingsWidget::setupUI()
     themeLayout->addWidget(new QLabel("Theme:"));
     m_themeCombo = new QComboBox();
 
-    /* FIXME: Theme control on Linux needs to be implemented */
-#ifdef __linux__
+    /* FIXME: Theme control needs to be implemented */
     m_themeCombo->addItems({"System Default"});
-#else
-    m_themeCombo->addItems({"System Default", "Light", "Dark"});
-#endif
+    // m_themeCombo->addItems({"System Default", "Light", "Dark"});
 
     themeLayout->addWidget(m_themeCombo);
     themeLayout->addStretch();

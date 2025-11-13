@@ -80,8 +80,9 @@ void handleCallback(const idevice_event_t *event, void *userData)
 
     case IDEVICE_DEVICE_PAIRED: {
         if (event->conn_type == CONNECTION_NETWORK) {
-            warn("Network devices are not supported but a network device was "
-                 "received in event listener. Please report this issue.");
+            qDebug()
+                << "Network devices are not supported but a network device was "
+                   "received in event listener. Please report this issue.";
             return;
         }
         qDebug() << "Device paired: " << QString::fromUtf8(event->udid);
@@ -241,7 +242,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
     qDebug() << "Subscribed to device events successfully.";
     createMenus();
-    // Example usage with customization
 
     UpdateProcedure updateProcedure;
     bool packageManagerManaged = false;
@@ -256,15 +256,27 @@ MainWindow::MainWindow(QWidget *parent)
     }
 #endif
 
+    /*
+    struct UpdateProcedure {
+        bool openFile;
+        bool openFileDir;
+        bool quitApp;
+        QString boxInformativeText;
+        QString boxText;
+    };
+    */
     switch (ZUpdater::detectPlatform()) {
     // todo: adjust for portable
     case Platform::Windows:
         updateProcedure = UpdateProcedure{
-            true,
-            false,
-            true,
-            "The application will now quit to install the update.",
-            "Do you want to install the downloaded update now?",
+            !isPortable,
+            isPortable,
+            !isPortable,
+            isPortable ? "New portable version downloaded, app location will "
+                         "be shown after this message"
+                       : "The application will now quit to install the update.",
+            isPortable ? "New portable version downloaded"
+                       : "Do you want to install the downloaded update now?",
         };
         break;
         // todo: adjust for pkg managers
@@ -296,13 +308,23 @@ MainWindow::MainWindow(QWidget *parent)
         };
     }
 
+    // FIXME: fix repo name
     m_updater =
         new ZUpdater("uncor3/libtest", APP_VERSION, "iDescriptor",
                      updateProcedure, isPortable, packageManagerManaged, this);
-    qDebug() << "Checking for updates...";
+#if defined(PACKAGE_MANAGER_MANAGED) && defined(__linux__)
+    m_updater->setPackageManagerManagedMessage(
+        QString(
+            "You seem to have installed iDescriptor using a package manager. "
+            "Please use %1 to update it.")
+            .arg(PACKAGE_MANAGER_HINT));
+#endif
+
     SettingsManager::sharedInstance()->doIfEnabled(
-        SettingsManager::Setting::AutoCheckUpdates,
-        [this]() { m_updater->checkForUpdates(); });
+        SettingsManager::Setting::AutoCheckUpdates, [this]() {
+            qDebug() << "Checking for updates...";
+            m_updater->checkForUpdates();
+        });
 }
 
 void MainWindow::createMenus()

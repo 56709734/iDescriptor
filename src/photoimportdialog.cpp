@@ -18,7 +18,7 @@
  */
 
 #include "photoimportdialog.h"
-#include "simplehttpserver.h"
+#include "httpserver.h"
 #include <QApplication>
 #include <QDateTime>
 #include <QFileInfo>
@@ -117,12 +117,12 @@ void PhotoImportDialog::init()
     progressBar->setRange(0, 0); // Indeterminate progress
 
     // Create and start HTTP server
-    m_httpServer = new SimpleHttpServer(this);
-    connect(m_httpServer, &SimpleHttpServer::serverStarted, this,
+    m_httpServer = new HttpServer(this);
+    connect(m_httpServer, &HttpServer::serverStarted, this,
             &PhotoImportDialog::onServerStarted);
-    connect(m_httpServer, &SimpleHttpServer::serverError, this,
+    connect(m_httpServer, &HttpServer::serverError, this,
             &PhotoImportDialog::onServerError);
-    connect(m_httpServer, &SimpleHttpServer::downloadProgress, this,
+    connect(m_httpServer, &HttpServer::downloadProgress, this,
             &PhotoImportDialog::onDownloadProgress);
 
     m_httpServer->start(selectedFiles);

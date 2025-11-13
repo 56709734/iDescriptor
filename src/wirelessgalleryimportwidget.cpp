@@ -38,6 +38,7 @@ WirelessGalleryImportWidget::WirelessGalleryImportWidget(QWidget *parent)
 {
     setupUI();
     setMinimumSize(800, 600);
+    setWindowTitle("Wireless Gallery Import - iDescriptor");
     QTimer::singleShot(100, this,
                        &WirelessGalleryImportWidget::setupTutorialVideo);
 }
@@ -131,7 +132,8 @@ void WirelessGalleryImportWidget::setupTutorialVideo()
                                          QSizePolicy::Expanding);
 
     m_tutorialPlayer->setVideoOutput(m_tutorialVideoWidget);
-    m_tutorialPlayer->setSource(QUrl("qrc:/resources/airplayer-tutorial.mp4"));
+    m_tutorialPlayer->setSource(
+        QUrl("qrc:/resources/wireless-gallery-import.mp4"));
     m_tutorialVideoWidget->setAspectRatioMode(
         Qt::AspectRatioMode::KeepAspectRatioByExpanding);
 

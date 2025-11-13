@@ -25,9 +25,11 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QSlider>
 #include <QSplitter>
 #include <QSplitterHandle>
 #include <QStyleOption>
+#include <QWheelEvent>
 #include <QWidget>
 
 #ifdef Q_OS_MAC
@@ -367,5 +369,30 @@ protected:
             emit clicked();
         }
         QLabel::mouseReleaseEvent(event);
+    }
+};
+
+class ZSlider : public QSlider
+{
+    Q_OBJECT
+
+public:
+    explicit ZSlider(QWidget *parent = nullptr) : QSlider(parent) {}
+    explicit ZSlider(Qt::Orientation orientation, QWidget *parent = nullptr)
+        : QSlider(orientation, parent)
+    {
+    }
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton) {
+            // Set the value to the position of the click
+            int value = QStyle::sliderValueFromPosition(
+                minimum(), maximum(), event->pos().x(), width());
+            setValue(value);
+        }
+        // Let the base class handle the rest of the event
+        QSlider::mousePressEvent(event);
     }
 };

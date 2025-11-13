@@ -20,6 +20,7 @@
 #ifndef MEDIAPREVIEWDIALOG_H
 #define MEDIAPREVIEWDIALOG_H
 
+#include "iDescriptor-ui.h"
 #include "iDescriptor.h"
 #include <QCoreApplication>
 #include <QDialog>
@@ -120,7 +121,7 @@ private:
     QPushButton *m_playPauseBtn;
     QPushButton *m_stopBtn;
     QPushButton *m_repeatBtn;
-    QSlider *m_timelineSlider;
+    ZSlider *m_timelineSlider;
     QLabel *m_timeLabel;
     QSlider *m_volumeSlider;
     QLabel *m_volumeLabel;

@@ -387,16 +387,16 @@ void ToolboxWidget::onCurrentDeviceChanged(const DeviceSelection &selection)
 {
     if (selection.type == DeviceSelection::Normal) {
         int index =
-            m_deviceCombo->findData(QString::fromStdString(selection.uuid));
+            m_deviceCombo->findData(QString::fromStdString(selection.udid));
         if (index != -1) {
             // Block signals to prevent recursive calls when we update the UI
             m_deviceCombo->blockSignals(true);
             m_deviceCombo->setCurrentIndex(index);
             m_deviceCombo->blockSignals(false);
 
-            m_uuid = selection.uuid;
+            m_uuid = selection.udid;
             m_currentDevice =
-                AppContext::sharedInstance()->getDevice(selection.uuid);
+                AppContext::sharedInstance()->getDevice(selection.udid);
         }
     } else {
         // Handle recovery, pending, or no device selection
@@ -442,37 +442,23 @@ void ToolboxWidget::onToolboxClicked(iDescriptorTool tool)
         msgBox.exec();
     } break;
     case iDescriptorTool::MountDevImage: {
-        GetMountedImageResult result =
-            DevDiskManager::sharedInstance()->getMountedImage(
-                m_currentDevice->udid.c_str());
+        DevDiskImageHelper *devDiskImageHelper =
+            new DevDiskImageHelper(m_currentDevice, this);
 
-        if (!result.success) {
-            QMessageBox::warning(this, "Failure", result.message.c_str());
-            return;
-        }
-
-        if (result.success && result.sig.empty()) {
-            bool devImgSuccess =
-                DevDiskManager::sharedInstance()->mountCompatibleImage(
-                    m_currentDevice);
-            if (!devImgSuccess) {
-                QMessageBox::warning(
-                    this, "Failure",
-                    "Failed to mount developer image on device. "
-                    "Try with a different cable.");
-                qDebug()
-                    << "Failed to mount developer image on device. Cannot set "
-                       "location.";
-                return;
-            }
-        }
-
-        QMessageBox::information(
-            this, "Success",
-            QString("There is already a developer image mounted on device %1.")
-                .arg(QString::fromStdString(
-                    m_currentDevice->deviceInfo.productType)));
-
+        connect(devDiskImageHelper, &DevDiskImageHelper::mountingCompleted,
+                this, [this, devDiskImageHelper](bool success) {
+                    devDiskImageHelper->deleteLater();
+                    if (success) {
+                        QMessageBox::information(
+                            this, "Success",
+                            "Developer image mounted successfully.");
+                    } else {
+                        QMessageBox::warning(
+                            this, "Failure",
+                            "Failed to mount developer image.");
+                    }
+                });
+        devDiskImageHelper->start();
     } break;
     case iDescriptorTool::VirtualLocation: {
         // Handle virtual location functionality

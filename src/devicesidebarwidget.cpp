@@ -393,8 +393,8 @@ void DeviceSidebarWidget::updateSelection()
 
     // Set selection based on current selection
     if (m_currentSelection.type == DeviceSelection::Normal &&
-        m_deviceItems.contains(m_currentSelection.uuid)) {
-        m_deviceItems[m_currentSelection.uuid]->setSelected(true);
+        m_deviceItems.contains(m_currentSelection.udid)) {
+        m_deviceItems[m_currentSelection.udid]->setSelected(true);
     } else if (m_currentSelection.type == DeviceSelection::Recovery &&
                m_recoveryItems.contains(m_currentSelection.ecid)) {
         m_recoveryItems[m_currentSelection.ecid]->setSelected(true);
