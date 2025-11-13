@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
 
     qputenv("GST_PLUGIN_PATH", gstPluginPath.toUtf8());
     qDebug() << "GST_PLUGIN_PATH=" << gstPluginPath;
-    qputenv("GST_REGISTRY_REUSE_PLUGIN_SCANNER", "yes");
-    qDebug() << "GST_REGISTRY_REUSE_PLUGIN_SCANNER=yes";
+    qputenv("GST_REGISTRY_REUSE_PLUGIN_SCANNER", "no");
+    qDebug() << "GST_REGISTRY_REUSE_PLUGIN_SCANNER=no";
     qputenv("GST_PLUGIN_SYSTEM_PATH", gstPluginPath.toUtf8());
     qDebug() << "GST_PLUGIN_SYSTEM_PATH=" << gstPluginPath;
     qputenv("GST_DEBUG", "GST_PLUGIN_LOADING:5");

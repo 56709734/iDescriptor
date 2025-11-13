@@ -189,20 +189,28 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Install & CPack
+        id: cpack_step # Add an ID to this step
         working-directory: build
         shell: pwsh
         run: |
           cmake --install .
           cpack .
+          # Find the generated files and set them as outputs
+          $msiFile = Get-ChildItem -Path "artifacts/*.msi" | Select-Object -First 1
+          $zipFile = Get-ChildItem -Path "artifacts/*.zip" | Select-Object -First 1
+          echo "msi_name=$($msiFile.Name)" >> $env:GITHUB_OUTPUT
+          echo "msi_path=$($msiFile.FullName)" >> $env:GITHUB_OUTPUT
+          echo "zip_name=$($zipFile.Name)" >> $env:GITHUB_OUTPUT
+          echo "zip_path=$($zipFile.FullName)" >> $env:GITHUB_OUTPUT
 
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iDescriptor-Windows-Installer
-          path: build/artifacts/*.msi
+          name: ${{ steps.cpack_step.outputs.msi_name }}
+          path: ${{ steps.cpack_step.outputs.msi_path }}
 
       - name: Upload Portable ZIP Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iDescriptor-Windows-Portable
-          path: build/artifacts/*.zip
+          name: ${{ steps.cpack_step.outputs.zip_name }}
+          path: ${{ steps.cpack_step.outputs.zip_path }}
