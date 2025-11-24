@@ -1,8 +1,16 @@
 {
   "app-id": "com.idescriptor.idescriptor",
   "runtime": "org.kde.Platform",
-  "runtime-version": "6.7",
+  "runtime-version": "6.8",
   "sdk": "org.kde.Sdk",
+  "add-extensions": {
+    "org.kde.Platform.ffmpeg-full": {
+      "version": "24.08",
+      "directory": "lib/ffmpeg",
+      "add-ld-path": "."
+    }
+  },
+  "cleanup-commands": ["mkdir -p ${FLATPAK_DEST}/lib/ffmpeg"],
   "command": "iDescriptor",
   "finish-args": [
     "--socket=x11",
@@ -10,19 +18,30 @@
     "--socket=pulseaudio",
     "--share=network",
     "--device=all",
-    "--talk-name=org.freedesktop.Avahi",
+    "--socket=system-bus",
+    "--filesystem=/run/usbmuxd:rw",
+    "--filesystem=/run/udev:ro",
+    "--filesystem=/dev:ro",
+    "--filesystem=/sys/bus:ro",
+    "--filesystem=/sys/class:ro",
+    "--filesystem=/sys/devices:ro",
+    "--system-talk-name=org.freedesktop.Avahi",
     "--talk-name=org.libimobiledevice.usbmuxd",
-    "--system-talk-name=org.libimobiledevice.usbmuxd"
+    "--system-talk-name=org.libimobiledevice.usbmuxd",
+    "--system-talk-name=org.freedesktop.UDisks2",
+    "--system-talk-name=org.freedesktop.login1",
+    "--system-talk-name=org.freedesktop.NetworkManager",
+    "--system-talk-name=org.freedesktop.UPower",
+    "--system-talk-name=org.freedesktop.systemd1",
+    "--talk-name=org.freedesktop.Platform.ffmpeg-full",
+    "--env=QT_MEDIA_BACKEND=ffmpeg",
+    "--env=AVAHI_COMPAT_NOWARN=1"
   ],
   "modules": [
     {
       "name": "lxqt-build-tools",
-      "buildsystem": "simple",
-      "build-commands": [
-        "cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/app",
-        "cmake --build build",
-        "cmake --install build"
-      ],
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
       "sources": [
         {
           "type": "git",
@@ -59,17 +78,12 @@
     },
     {
       "name": "qtermwidget",
-      "buildsystem": "simple",
-      "build-commands": [
-        "cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/app",
-        "cmake --build build",
-        "cmake --install build"
-      ],
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
       "sources": [
         {
           "type": "git",
-          "url": "https://github.com/uncor3/qtermwidget.git",
-          "branch": "main"
+          "url": "https://github.com/lxqt/qtermwidget"
         }
       ]
     },
@@ -106,7 +120,7 @@
     },
     {
       "name": "libusb",
-      "config-opts": ["--disable-static"],
+      "config-opts": ["--disable-static", "--enable-udev"],
       "cleanup": ["/lib/*.la", "/lib/pkgconfig", "/include"],
       "sources": [
         {
@@ -214,7 +228,7 @@
     {
       "name": "libheif",
       "buildsystem": "cmake-ninja",
-      "config-opts": ["-DWITH_EXAMPLES=OFF"],
+      "config-opts": ["-DWITH_EXAMPLES=OFF", "-DWITH_DOCUMENTATION=OFF"],
       "sources": [
         {
           "type": "git",
@@ -235,12 +249,8 @@
     },
     {
       "name": "libssh",
-      "buildsystem": "simple",
-      "build-commands": [
-        "cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/app",
-        "cmake --build build",
-        "cmake --install build"
-      ],
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
       "sources": [
         {
           "type": "archive",
@@ -269,7 +279,8 @@
         "-DCUSTOM_LIB_PATH=/app/lib",
         "-DCUSTOM_INCLUDE_PATH=/app/include",
         "-DCUSTOM_PKGCONFIG_PATH=/app/lib/pkgconfig",
-        "-DGO_EXECUTABLE=/app/sdk/golang/bin/go"
+        "-DGO_EXECUTABLE=/app/sdk/golang/bin/go",
+        "-DFLATPAK_BUILD=ON"
       ],
       "sources": [
         {
