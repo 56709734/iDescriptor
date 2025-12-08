@@ -143,10 +143,12 @@ DeviceInfoWidget::DeviceInfoWidget(iDescriptorDevice *device, QWidget *parent)
     m_chargingStatusLabel =
         new QLabel(device->deviceInfo.batteryInfo.isCharging ? "Charging"
                                                              : "Not Charging");
+
     m_chargingStatusLabel->setStyleSheet(
         device->deviceInfo.batteryInfo.isCharging
             ? QString("color: %1;").arg(COLOR_GREEN.name())
-            : "color: white;");
+            : QString("color: %1;")
+                  .arg(qApp->palette().color(QPalette::WindowText).name()));
 
     // Create the layout without a parent widget
     QHBoxLayout *chargingLayout = new QHBoxLayout();
